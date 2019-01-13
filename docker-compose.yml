@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  imglang:
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/workspace/notebooks
+      - ./tests:/workspace/tests
+      - ./imantics:/workspace/libs/imantics
+    build: .
