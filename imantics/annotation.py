@@ -163,7 +163,11 @@ class BBox:
         rmin, rmax = np.where(rows)[0][[0, -1]]
         cmin, cmax = np.where(cols)[0][[0, -1]]
 
-        return Bbox((cmin, rmin, cmax, rmax))
+        return cls((cmin, rmin, cmax, rmax))
+    
+    @classmethod
+    def from_segments(cls, segment):
+        pass
 
     def __init__(self, bbox, style='minmax'):
         """
