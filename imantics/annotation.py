@@ -36,7 +36,8 @@ class Annotation:
             self._update_mask_from_segments()
 
         if not provided:
-            raise ValueError("Please provided one of the follow, segments, bbox, or mask")
+            raise ValueError(
+                "Please provided one of the follow, segments, bbox, or mask")
 
     @property
     def segments(self):
@@ -65,7 +66,8 @@ class Annotation:
     @mask.setter
     def mask(self, value):
 
-        assert value.shape == (self._height, self._width), "Mask shape needs to match height and width"
+        assert value.shape == (
+            self._height, self._width), "Mask shape needs to match height and width"
 
         self._mask = value
 
@@ -140,7 +142,7 @@ class Annotation:
         return True
 
 
-class Bbox:
+class BBox:
     """
     Bounding Box Class
     """
@@ -154,7 +156,7 @@ class Bbox:
         Returns bounding box class of a mask
 
         :param mask: Numpy binary mask
-        :return: Bbox class
+        :return: BBox class
         """
         rows = np.any(mask, axis=1)
         cols = np.any(mask, axis=0)
@@ -181,18 +183,18 @@ class Bbox:
             self._compute_size()
 
         if style == self.WIDTH_HEIGHT:
-            self._width = bbox[2]
-            self._height = bbox[3]
+            self.width = bbox[2]
+            self.height = bbox[3]
             self._compute_max_point()
 
-        self.area = self._width * self._height
+        self.area = self.width * self.height
         self._compute_segment()
 
     @property
     def bbox(self):
         if self.style == self.MIN_MAX:
             return self._xmin, self._ymin, self._xmax, self._ymax
-        return self._xmin, self._ymin, self._width, self._height
+        return self._xmin, self._ymin, self.width, self.height
 
     @property
     def min_point(self):
@@ -204,15 +206,15 @@ class Bbox:
 
     @property
     def size(self):
-        return self._width, self._height
-
+        return self.width, self.height
+    
     def _compute_segment(self):
 
         self.segment = [[
             self._xmin, self._ymin,
-            self._xmin + self._width, self._ymin,
+            self._xmin + self.width, self._ymin,
             self._xmax, self._ymax,
-            self._xmax - self._width, self._ymax
+            self._xmax - self.width, self._ymax
         ]]
 
     def __getitem__(self, item):
@@ -222,12 +224,12 @@ class Bbox:
         return repr(self.bbox)
 
     def _compute_max_point(self):
-        self._xmax = self._xmin + self._width
-        self._ymax = self._ymin + self._width
+        self._xmax = self._xmin + self.width
+        self._ymax = self._ymin + self.height
 
     def _compute_size(self):
-        self._width = self._xmax - self._xmin
-        self._height = self._ymax - self._ymin
+        self.width = self._xmax - self._xmin
+        self.height = self._ymax - self._ymin
 
 
-__all__ = ["Annotation", "Bbox"]
+__all__ = ["Annotation", "BBox"]
