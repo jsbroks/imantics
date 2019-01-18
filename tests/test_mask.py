@@ -66,7 +66,7 @@ test_contains_mask = [
 
 class TestMaskInitalization:
 
-    def test_from_segments(self):
+    def test_from_segment(self):
         pass
     
     def test_from_bbox(self):
@@ -78,7 +78,7 @@ class TestMaskConversion:
     def test_to_bbox(self):
         pass
     
-    def test_to_segments(self):
+    def test_to_segment(self):
         pass
 
 

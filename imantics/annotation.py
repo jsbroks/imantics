@@ -153,24 +153,29 @@ class BBox:
     @classmethod
     def from_mask(cls, mask):
         """
-        Returns bounding box class of a mask
+        Returns bounding box class from a mask or array
 
         :param mask: Numpy binary mask
         :return: BBox class
         """
-        if isinstance(mask, Mask):
-            return mask.bbox
-
-        rows = np.any(mask, axis=1)
-        cols = np.any(mask, axis=0)
-        rmin, rmax = np.where(rows)[0][[0, -1]]
-        cmin, cmax = np.where(cols)[0][[0, -1]]
-
-        return cls((cmin, rmin, cmax, rmax))
+        if isinstance(mask, np.ndarray):
+            mask = Mask(mask)
+        return mask.bbox()
     
     @classmethod
-    def from_segments(cls, segment):
-        pass
+    def from_segment(cls, segment):
+        """
+        Returns bounding box class from a segment or list
+
+        :param mask: Numpy binary mask
+        :return: BBox class
+        """
+        if isinstance(segment, list):
+            segment = Segment(segment)
+        return segment.bbox()
+
+    _c_segment = None
+    _c_mask = None
 
     def __init__(self, bbox, style='minmax'):
         """
@@ -195,7 +200,6 @@ class BBox:
             self._compute_max_point()
 
         self.area = self.width * self.height
-        self._compute_segment()
 
     @property
     def bbox(self):
@@ -210,19 +214,26 @@ class BBox:
     @property
     def max_point(self):
         return self._xmax, self._ymax
+    
+    @property
+    def top_right(self):
+        return self._xmax, self._ymin
 
+    @property
+    def top_left(self):
+        return self._xmin, self._ymax
+        
+    @property
+    def bottom_right(self):
+        return self._xmax, self._ymax
+
+    @property
+    def bottom_left(self):
+        return self._xmin, self._ymax
+    
     @property
     def size(self):
         return self.width, self.height
-    
-    def _compute_segment(self):
-
-        self.segment = [[
-            self._xmin, self._ymin,
-            self._xmin + self.width, self._ymin,
-            self._xmax, self._ymax,
-            self._xmax - self.width, self._ymax
-        ]]
 
     def __getitem__(self, item):
         return self.bbox[item]
@@ -239,35 +250,101 @@ class BBox:
         self.height = self._ymax - self._ymin
 
 
-class Segments:
+class Segment:
 
-    def __init__(self):
+    @classmethod
+    def from_mask(cls):
         pass
+
+    @classmethod
+    def from_bbox(cls, bbox):
+        pass
+
+    _c_bbox = None
+    _c_mask = None
+
+    def __init__(self, segment):
+        self.segment = segment
+    
+    def mask(self, size):
+        if not self._c_mask:
+            
+            # Generate mask from segment
+            mask = np.zeros(size)
+            points = [
+                np.array(point).reshape(-1, 2).round().astype(int)
+                for point in self.segment
+            ]
+            mask = cv2.fillPoly(mask, points, 1)
+            
+            self._c_mask = Mask(mask)
+            self._c_mask._c_segment = self
+        
+        return self._c_mask
+
+
+    def bbox(self):
+        if not self._c_bbox:
+
+            # TODO: Generate bbox from segment
+
+            self._c_bbox = BBox((0, 0, 0, 0))
+            self._c_bbox._c_segment = self
+
+        return self._c_bbox
 
 
 class Mask:
     """
     Mask class
     """
+    @classmethod
+    def from_segment(cls):
+        pass
+    
+    @classmethod
+    def from_bbox(cls, bbox):
+        
+        mask = Mask()
+        mask._c_bbox = bbox
+        return mask
+
     _c_bbox = None
-    _c_segments = None
+    _c_segment = None
 
     def __init__(self, array):
         self.array = np.array(array, dtype=bool)
-
+    
     def bbox(self):
         if not self._c_bbox:
-            self._c_bbox = BBox.from_mask(self.array)
+
+            # Generate bbox from mask
+            rows = np.any(self.array, axis=1)
+            cols = np.any(self.array, axis=0)
+            rmin, rmax = np.where(rows)[0][[0, -1]]
+            cmin, cmax = np.where(cols)[0][[0, -1]]
+
+            self._c_bbox = BBox((cmin, rmin, cmax, rmax))
+            self._c_bbox._c_mask = self
+
         return self._c_bbox
     
     def segments(self):
-        if not self._c_segments:
-            self._c_segments = Segments.from_mask(self.array)
-        return self._c_segments
+        if not self._c_segment:
+
+            # TODO: Generate segment from mask
+            contours = cv2.findContours(self.array, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+            print(contours)
+
+            self._c_segment = Segment()
+            self._c_segment._c_mask = self
+
+        return self._c_segment
     
     def union(self, other):
         """
-        Unites the array of the specified mask with this mask’s array and returns the result as a new mask.
+        Unites the array of the specified mask with this mask’s array and
+        returns the result as a new mask.
         
         :param other: mask (or numpy array) to unite with
         :return: resulting mask
@@ -282,7 +359,8 @@ class Mask:
 
     def intersect(self, other):
         """
-        Intersects the array of the specified mask with this masks’s array and returns the result as a new mask.
+        Intersects the array of the specified mask with this masks’s array
+        and returns the result as a new mask.
 
         :param other: mask (or numpy array) to intersect with
         :return: resulting mask
@@ -318,7 +396,8 @@ class Mask:
 
     def subtract(self, other):
         """
-        Subtracts the array of the specified mask from this masks’s array and returns the result as a new mask.
+        Subtracts the array of the specified mask from this masks’s array and
+        returns the result as a new mask.
 
         :param other: mask (or numpy array) to subtract
         :retrn: resulting mask
@@ -377,5 +456,9 @@ class Mask:
             return np.array_equal(self.array, other.array)
 
         return False
+    
+    def __repr__(self):
+        return repr(self.array)
 
-__all__ = ["Annotation", "BBox", "Mask"]
+
+__all__ = ["Annotation", "BBox", "Mask", "Segment"]
