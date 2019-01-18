@@ -15,7 +15,7 @@ class Annotation:
     def __init__(self, width=0, height=0, mask=None, segments=None, bbox=None):
 
         if width < 1 or height < 1:
-            raise ValueError("Please provide a valid height or width of image")
+            raise ValueError("Please provide a valid height and width of image")
 
         self._height = height
         self._width = width
@@ -158,6 +158,9 @@ class BBox:
         :param mask: Numpy binary mask
         :return: BBox class
         """
+        if isinstance(mask, Mask):
+            return mask.bbox
+
         rows = np.any(mask, axis=1)
         cols = np.any(mask, axis=0)
         rmin, rmax = np.where(rows)[0][[0, -1]]
@@ -236,4 +239,38 @@ class BBox:
         self.height = self._ymax - self._ymin
 
 
-__all__ = ["Annotation", "BBox"]
+
+class Segments:
+
+    def __init__(self):
+        pass
+
+
+class Mask:
+    
+    def __init__(self, array):
+        self.array = np.array(array, dtype=bool)
+
+    def bbox(self):
+        return BBox.from_mask(self.array)
+    
+    def union(self, other):
+        return np.logical_or(self.array, other.array)
+    
+    def intersect(self, other):
+        return np.logical_and(self.array, other.array)
+
+    def iou(self, other):
+        i = self.intersect(other).sum()
+        u = self.union(other).sum()
+        
+        if i == 0 or u == 0:
+            return 0
+
+        return i / float(u)
+    
+    def __getitem__(self, item):
+        return self.array[item]
+
+
+__all__ = ["Annotation", "BBox", "Mask"]
