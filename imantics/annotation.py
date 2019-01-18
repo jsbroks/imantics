@@ -239,7 +239,6 @@ class BBox:
         self.height = self._ymax - self._ymin
 
 
-
 class Segments:
 
     def __init__(self):
@@ -247,20 +246,62 @@ class Segments:
 
 
 class Mask:
-    
+    """
+    Mask class
+    """
+    _c_bbox = None
+    _c_segments = None
+
     def __init__(self, array):
         self.array = np.array(array, dtype=bool)
 
     def bbox(self):
-        return BBox.from_mask(self.array)
+        if not self._c_bbox:
+            self._c_bbox = BBox.from_mask(self.array)
+        return self._c_bbox
+    
+    def segments(self):
+        if not self._c_segments:
+            self._c_segments = Segments.from_mask(self.array)
+        return self._c_segments
     
     def union(self, other):
-        return np.logical_or(self.array, other.array)
+        """
+        Unites the array of the specified mask with this mask’s array and returns the result as a new mask.
+        
+        :param other: mask (or numpy array) to unite with
+        :return: resulting mask
+        """
+        if isinstance(other, np.ndarray):
+            other = Mask(other)
+        
+        return Mask(np.logical_or(self.array, other.array))
     
+    def __add__(self, other):
+        return self.union(other)
+
     def intersect(self, other):
-        return np.logical_and(self.array, other.array)
+        """
+        Intersects the array of the specified mask with this masks’s array and returns the result as a new mask.
+
+        :param other: mask (or numpy array) to intersect with
+        :return: resulting mask
+        """
+        if isinstance(other, np.ndarray):
+            other = Mask(other)
+
+        return Mask(np.logical_and(self.array, other.array))
+    
+    def __mul__(self, other):
+        return self.intersect(other)
 
     def iou(self, other):
+        """
+        Intersect over union value of the specified masks
+
+        :param other: mask (or numpy array) to compute value with
+        :return: resulting float value
+        """
         i = self.intersect(other).sum()
         u = self.union(other).sum()
         
@@ -269,8 +310,72 @@ class Mask:
 
         return i / float(u)
     
-    def __getitem__(self, item):
-        return self.array[item]
+    def invert(self):
+        return Mask(np.invert(self.array))
+    
+    def __invert__(self):
+        return self.invert()
 
+    def subtract(self, other):
+        """
+        Subtracts the array of the specified mask from this masks’s array and returns the result as a new mask.
+
+        :param other: mask (or numpy array) to subtract
+        :retrn: resulting mask
+        """
+        if isinstance(other, np.ndarray):
+            other = Mask(other)
+        
+        return self.intersect(other.invert())
+
+    def __sub__(self, other):
+        return self.subtract(other)
+
+    def contains(self, item):
+        """
+        Checks whether a point (tuple), array or mask is within current mask.
+        Note: Masks and arrays must be fully contained to return True
+        
+        :param item: object to check
+        :return: boolean if item is contained
+        """
+        if isinstance(item, tuple):
+            array = self.array
+            for i in item:
+                array = array[i]
+            return array
+        
+        if isinstance(item, np.ndarray):
+            item = Mask(item)
+
+        if isinstance(item, Mask):
+            return self.intersect(item).area() > 0
+        
+        return False
+
+    def __contains__(self, item):
+        return self.contains(item)
+    
+    def sum(self):
+        return self.array.sum()
+
+    def area(self):
+        return self.sum()
+    
+    def __getitem__(self, key):
+        return self.array[key]
+    
+    def __setitem__(self, key, value):
+        self.array[key] = value
+    
+    def __eq__(self, other):
+        if isinstance(other, (np.ndarray, list)):
+            other = Mask(other)
+        
+        if isinstance(other, Mask):
+            print(self.array, other.array)
+            return np.array_equal(self.array, other.array)
+
+        return False
 
 __all__ = ["Annotation", "BBox", "Mask"]
