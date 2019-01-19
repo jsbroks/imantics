@@ -70,6 +70,9 @@ class Annotation:
     def area(self):
         return self.mask.area()
 
+    def __contains__(self, item):
+        return self.mask.contains(item)
+
     def _vgg(self):
         pass
 
