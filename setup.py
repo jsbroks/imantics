@@ -9,6 +9,6 @@ setup(
     author_email='jsbroks@gmail.com',
     license='MIT',
     install_requires=['numpy', 'opencv-python>=3'],
-    packages=['imantics', 'imantics.annotation'],
+    packages=['imantics'],
     zip_safe=False
 )
