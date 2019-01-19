@@ -4,7 +4,7 @@ import cv2
 
 class Annotation:
     
-    def __init__(self, size, bbox=None, mask=None, polygons=None, id=0, metadata={}):
+    def __init__(self, size=None, bbox=None, mask=None, polygons=None, id=0, metadata={}):
 
         self.id = id
         self.size = size
@@ -40,6 +40,10 @@ class Annotation:
                 self._c_mask = self.bbox.mask(size)
         
         return self._c_mask
+    
+    @property
+    def array(self):
+        return self.mask.array
 
     @property
     def polygons(self):
@@ -62,6 +66,10 @@ class Annotation:
 
         return self._c_bbox
 
+    @property
+    def area(self):
+        return self.mask.area()
+
     def _vgg(self):
         pass
 
@@ -72,7 +80,7 @@ class Annotation:
         coco['width'] = image.width
         coco['height'] = image.height
         coco['category_id'] = category.id
-        coco['area'] = self.mask.area()
+        coco['area'] = self.area
         coco['segmentations'] = self.polygons
         coco['bbox'] = self.bbox.style(BBox.WIDTH_HEIGHT)
         coco['metadata'] = self.metadata
@@ -156,8 +164,8 @@ class BBox:
 
             # Generate mask
             mask = np.zeros(size)
-            mask[self.top_left[0]:self.top_right[1], \
-                 self.bottom_right[0]:self.bottom_right[1]] = 1
+            
+            mask[self.min_point[1]:self.max_point[1], self.min_point[0]:self.max_point[0]] = 1
                 
             self._c_mask = Mask(mask)
 
@@ -200,6 +208,9 @@ class BBox:
 
     def __repr__(self):
         return repr(self.bbox())
+    
+    def __str__(self):
+        return str(self.bbox())
     
     def __eq__(self, other):
         if isinstance(other, self.INSTANCE_TYPES):

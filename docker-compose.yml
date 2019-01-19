@@ -5,7 +5,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./notebooks:/workspace/notebooks
+      - ./examples:/workspace/notebooks
       - ./tests:/workspace/tests
       - ./imantics:/workspace/libs/imantics
     build: .
