@@ -3,41 +3,45 @@ import cv2
 
 
 class Annotation:
+        
+    @classmethod
+    def from_mask(cls, image, category, mask):
+        return cls(image, category, mask=mask)
     
-    def __init__(self, size=None, bbox=None, mask=None, polygons=None, id=0, metadata={}):
+    @classmethod
+    def from_bbox(cls, image, category, bbox):
+        return cls(image, category, bbox=bbox)
+    
+    @classmethod
+    def from_polygons(cls, image, category, polygons):
+        return cls(image, category, polygons=polygons)
 
+    def __init__(self, image, category, bbox=None, mask=None, polygons=None, id=0, color=None, metadata={}):
+        
+        assert isinstance(id, int), "id must be an integer"
+        assert bbox or mask or polygons, "you must provide a mask, bbox or polygon"
+        
         self.id = id
-        self.size = size
+        self.image = image
+        self.category = category
+        
         self._c_bbox = BBox.create(bbox)
         self._c_mask = Mask.create(mask)
         self._c_polygons = Polygons.create(polygons)
 
-        self._init_with_bbox = self._c_bbox != None
-        self._init_with_mask = self._c_mask != None
-        self._init_with_polygons = self._c_polygons != None
-
-        if not self._c_bbox and not self._c_mask and not self._c_polygons:
-            ValueError("You must provide one of the following, BBox, Mask or polygon")
+        self._init_with_bbox = self._c_bbox is not None
+        self._init_with_mask = self._c_mask is not None
+        self._init_with_polygons = self._c_polygons is not None
 
         self.metadata = metadata
 
     @property
     def mask(self):
-
-        # if self._c_mask and self._c_mask.array.shape != self.size:
-        #     if self._init_with_mask:
-        #         pass
-        #     else:
-        #         # Regenerate mask
-        #         self._c_mask = None
-
         if not self._c_mask:
-            size = self.size if self.size else self.bbox.max_point
-
             if self._init_with_polygons:
-                self._c_mask = self.polygons.mask(size)
+                self._c_mask = self.polygons.mask(width=self.image.width, height=self.image.height)
             else:
-                self._c_mask = self.bbox.mask(size)
+                self._c_mask = self.bbox.mask(width=self.image.width, height=self.image.height)
         
         return self._c_mask
     
@@ -69,6 +73,10 @@ class Annotation:
     @property
     def area(self):
         return self.mask.area()
+
+    @property
+    def size(self):
+        return self.image.size
 
     def __contains__(self, item):
         return self.mask.contains(item)
@@ -162,17 +170,20 @@ class BBox:
             return Polygons([polygon])
         return self._c_polygons
 
-    def mask(self, size):
+    def mask(self, width=None, height=None):
         if not self._c_mask:
 
-            # Generate mask
-            mask = np.zeros(size)
-            
+            size = height, width if height and width else self.max_point[1], self.max_point[0]
+            mask = np.zeros((height, width))
             mask[self.min_point[1]:self.max_point[1], self.min_point[0]:self.max_point[0]] = 1
                 
             self._c_mask = Mask(mask)
 
         return self._c_mask
+
+    def apply(self, image, color=None, thickness=2):
+        color = color if color else (255, 0, 0)
+        cv2.rectangle(image, self.min_point, self.max_point, color, thickness)
 
     @property
     def min_point(self):
@@ -239,12 +250,13 @@ class Polygons:
         
     @classmethod
     def create(cls, polygons):
+
         if isinstance(polygons, Polygons.INSTANCE_TYPES):
             return Polygons(polygons)
         
         if isinstance(polygons, Polygons):
             return polygons
-        
+            
         return None
     
     _c_bbox = None
@@ -254,10 +266,12 @@ class Polygons:
     def __init__(self, polygons):
         self.polygons = [np.array(polygon).flatten() for polygon in polygons]
     
-    def mask(self, size=None):
+    def mask(self, width=None, height=None):
         if not self._c_mask:
-            size = size if size else self.bbox().max_point
+
+            size = height, width if height and width else self.bbox().max_point
             # Generate mask from polygons
+
             mask = np.zeros(size)
             mask = cv2.fillPoly(mask, self.points, 1)
             
@@ -435,6 +449,17 @@ class Mask:
     
     def __invert__(self):
         return self.invert()
+    
+    def apply(self, image, color=None, alpha=0.5):        
+        color = color if color else (255, 0, 0)
+        for c in range(3):
+            image[:, :, c] = np.where(
+                self.array,
+                image[:, :, c] * (1 - alpha) + alpha * color[c],
+                image[:, :, c]
+            )
+        
+        return image
 
     def subtract(self, other):
         """
