@@ -63,23 +63,51 @@ test_contains_mask = [
     ([0, 0, 0, 0], [0, 0, 0, 0], False)    
 ]
 
+test_to_bbox = [
+    # array, expected bounding box
+    (np.zeros((4,4)), (0, 0, 0, 0)),
+    ([
+        [0, 0, 0, 0],
+        [0, 1, 1, 0],
+        [0, 1, 1, 0],
+        [0, 0, 0, 0]
+    ], (1, 1, 2, 2)),
+    ([
+        [1, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 1]
+    ], (0, 0, 3, 3)),
+    ([
+        [0, 0, 0, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [1, 0, 0, 0]
+    ], (0, 0, 3, 3)),
+    (np.ones((4,4)), (0, 0, 3, 3)),
+]
 
-class TestMaskInitalization:
-
-    def test_from_segment(self):
-        pass
-    
-    def test_from_bbox(self):
-        pass
+test_to_polygons = [
+    # array, expected bounding box
+    (np.zeros((4,4)), []),
+    (np.ones((4,4)), [[0, 0, 0, 3, 3, 3, 3, 0]]),
+]
 
 
 class TestMaskConversion:
 
-    def test_to_bbox(self):
-        pass
-    
-    def test_to_segment(self):
-        pass
+    @pytest.mark.parametrize("array,e_bbox", test_to_bbox)
+    def test_to_bbox(self, array, e_bbox):
+        mask = Mask(array)
+
+        assert mask.bbox() == e_bbox
+
+    @pytest.mark.parametrize("array,e_polygons", test_to_polygons)
+    def test_to_polygons(self, array, e_polygons):
+        mask = Mask(array)
+
+        # order can differ depending on algo
+        assert mask.polygons() == e_polygons
 
 
 class TestMaskComputations:

@@ -146,64 +146,54 @@ class BBox:
     """
     Bounding Box Class
     """
-
+    INSTANCE_TYPES = (np.ndarray, list, tuple)
     MIN_MAX = 'minmax'
     WIDTH_HEIGHT = 'widthheight'
 
     @classmethod
     def from_mask(cls, mask):
-        """
-        Returns bounding box class from a mask or array
-
-        :param mask: Numpy binary mask
-        :return: BBox class
-        """
-        if isinstance(mask, np.ndarray):
-            mask = Mask(mask)
         return mask.bbox()
     
     @classmethod
-    def from_segment(cls, segment):
-        """
-        Returns bounding box class from a segment or list
+    def from_polygons(cls, polygons):
+        return polygons.bbox()
+    
+    @classmethod
+    def empty(cls):
+        return BBox((0, 0, 0, 0))
 
-        :param mask: Numpy binary mask
-        :return: BBox class
-        """
-        if isinstance(segment, list):
-            segment = Segment(segment)
-        return segment.bbox()
-
-    _c_segment = None
+    _c_polygons = None
     _c_mask = None
 
-    def __init__(self, bbox, style='minmax'):
+    def __init__(self, bbox, style=None):
         """
         :param bbox:
         :param style: maxmin or widthheight
         """
         assert len(bbox) == 4
 
-        self.style = style
-
+        self.style = style if style else BBox.MIN_MAX
+        
         self._xmin = bbox[0]
         self._ymin = bbox[1]
 
-        if style == self.MIN_MAX:
+        if self.style == self.MIN_MAX:
             self._xmax = bbox[2]
             self._ymax = bbox[3]
-            self._compute_size()
+            self.width = self._xmax - self._xmin
+            self.height = self._ymax - self._ymin
 
-        if style == self.WIDTH_HEIGHT:
+        if self.style == self.WIDTH_HEIGHT:
             self.width = bbox[2]
             self.height = bbox[3]
-            self._compute_max_point()
-
+            self._xmax = self._xmin + self.width
+            self._ymax = self._ymin + self.height
+        
         self.area = self.width * self.height
 
-    @property
-    def bbox(self):
-        if self.style == self.MIN_MAX:
+    def bbox(self, style=None):
+        style = style if style else self.style
+        if style == self.MIN_MAX:
             return self._xmin, self._ymin, self._xmax, self._ymax
         return self._xmin, self._ymin, self.width, self.height
 
@@ -235,82 +225,114 @@ class BBox:
     def size(self):
         return self.width, self.height
 
-    def __getitem__(self, item):
-        return self.bbox[item]
-
-    def __repr__(self):
-        return repr(self.bbox)
-
-    def _compute_max_point(self):
-        self._xmax = self._xmin + self.width
-        self._ymax = self._ymin + self.height
-
     def _compute_size(self):
         self.width = self._xmax - self._xmin
         self.height = self._ymax - self._ymin
 
+    def __getitem__(self, item):
+        return self.bbox()[item]
 
-class Segment:
+    def __repr__(self):
+        return repr(self.bbox())
+    
+    def __eq__(self, other):
+        if isinstance(other, self.INSTANCE_TYPES):
+            other = BBox(other)
+        
+        if isinstance(other, BBox):
+            return np.array_equal(self.bbox(style=self.MIN_MAX), other.bbox(style=self.MIN_MAX))
+
+        return False
+
+
+class Polygons:
+    
+    INSTANCE_TYPES = (list, tuple)
 
     @classmethod
-    def from_mask(cls):
-        pass
+    def from_mask(cls, mask):
+        return mask.polygons()
 
     @classmethod
-    def from_bbox(cls, bbox):
-        pass
-
+    def from_bbox(cls, bbox, style=None):
+        return bbox.polygons()
+    
     _c_bbox = None
     _c_mask = None
+    _c_points = None
 
-    def __init__(self, segment):
-        self.segment = segment
+    def __init__(self, polygons):
+        self.polygons = [np.array(polygon).flatten() for polygon in polygons]
     
     def mask(self, size):
         if not self._c_mask:
             
-            # Generate mask from segment
+            # Generate mask from polygons
             mask = np.zeros(size)
-            points = [
-                np.array(point).reshape(-1, 2).round().astype(int)
-                for point in self.segment
-            ]
-            mask = cv2.fillPoly(mask, points, 1)
+            mask = cv2.fillPoly(mask, self.points, 1)
             
             self._c_mask = Mask(mask)
-            self._c_mask._c_segment = self
+            self._c_mask._c_polygons = self
         
         return self._c_mask
-
 
     def bbox(self):
         if not self._c_bbox:
 
-            # TODO: Generate bbox from segment
+            # TODO: Generate bbox from polygons
 
             self._c_bbox = BBox((0, 0, 0, 0))
-            self._c_bbox._c_segment = self
+            self._c_bbox._c_polygons = self
 
         return self._c_bbox
+
+    def simplify(self):
+        self._c_points = None
+        pass
+
+    def points(self):
+        if not self._c_points:
+            self._c_points = [
+                np.array(point).reshape(-1, 2).round().astype(int)
+                for point in self.polygons
+            ]
+        
+        return self._c_points
+
+    def __eq__(self, other):
+        if isinstance(other, self.INSTANCE_TYPES):
+            other = Polygons(other)
+        
+        if isinstance(other, Polygons):
+            for i in range(len(self.polygons)):
+                if not np.array_equal(self[i], other[i]):
+                    return False
+            return True
+    
+        return False
+    
+    def __getitem__(self, key):
+        return self.polygons[key]
+
+    def __repr__(self):
+        return repr(self.polygons)
 
 
 class Mask:
     """
     Mask class
     """
+
     @classmethod
-    def from_segment(cls):
-        pass
+    def from_polygons(cls, polygons):
+        return polygons.mask()
     
     @classmethod
     def from_bbox(cls, bbox):
-        
-        mask = Mask()
-        mask._c_bbox = bbox
-        return mask
+        return bbox.mask()
 
     _c_bbox = None
-    _c_segment = None
+    _c_polygons = None
 
     def __init__(self, array):
         self.array = np.array(array, dtype=bool)
@@ -321,6 +343,10 @@ class Mask:
             # Generate bbox from mask
             rows = np.any(self.array, axis=1)
             cols = np.any(self.array, axis=0)
+
+            if not np.any(rows) or not np.any(cols):
+                return BBox.empty()
+
             rmin, rmax = np.where(rows)[0][[0, -1]]
             cmin, cmax = np.where(cols)[0][[0, -1]]
 
@@ -329,17 +355,19 @@ class Mask:
 
         return self._c_bbox
     
-    def segments(self):
-        if not self._c_segment:
+    def polygons(self):
+        if not self._c_polygons:
 
-            # TODO: Generate segment from mask
-            contours = cv2.findContours(self.array, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-            print(contours)
+            # Generate polygons from mask
+            mask = self.array.astype(np.uint8)
+            mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
+            contours = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE, offset=(-1, -1))[1]
+            polygons = [polygon.flatten() for polygon in contours]
 
-            self._c_segment = Segment()
-            self._c_segment._c_mask = self
+            self._c_polygons = Polygons(polygons)
+            self._c_polygons._c_mask = self
 
-        return self._c_segment
+        return self._c_polygons
     
     def union(self, other):
         """
@@ -452,7 +480,6 @@ class Mask:
             other = Mask(other)
         
         if isinstance(other, Mask):
-            print(self.array, other.array)
             return np.array_equal(self.array, other.array)
 
         return False
@@ -461,4 +488,4 @@ class Mask:
         return repr(self.array)
 
 
-__all__ = ["Annotation", "BBox", "Mask", "Segment"]
+__all__ = ["Annotation", "BBox", "Mask", "Polygons"]

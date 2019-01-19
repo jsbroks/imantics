@@ -8,6 +8,7 @@ setup(
     author='Justin Brooks',
     author_email='jsbroks@gmail.com',
     license='MIT',
+    install_requires=['numpy', 'opencv-python>=3'],
     packages=['imantics', 'imantics.annotation'],
     zip_safe=False
 )
