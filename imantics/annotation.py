@@ -361,7 +361,7 @@ class Mask:
             # Generate polygons from mask
             mask = self.array.astype(np.uint8)
             mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
-            contours = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE, offset=(-1, -1))[1]
+            _, contours, _ = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE, offset=(-1, -1))
             polygons = [polygon.flatten() for polygon in contours]
 
             self._c_polygons = Polygons(polygons)

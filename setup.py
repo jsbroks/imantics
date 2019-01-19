@@ -8,7 +8,7 @@ setup(
     author='Justin Brooks',
     author_email='jsbroks@gmail.com',
     license='MIT',
-    install_requires=['numpy', 'opencv-python>=3'],
+    install_requires=['numpy', 'opencv-python>=4'],
     packages=['imantics'],
     zip_safe=False
 )
