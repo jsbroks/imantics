@@ -1,6 +1,9 @@
 import numpy as np
+import json
 import cv2
 
+from .styles import COCO
+from .utils import json_default
 
 class Annotation:
         
@@ -72,7 +75,9 @@ class Annotation:
 
     @property
     def area(self):
-        return self.mask.area()
+        if self._init_with_mask or self._init_with_polygons:
+            return self.mask.area()
+        return self.bbox.area
 
     @property
     def size(self):
@@ -84,18 +89,38 @@ class Annotation:
     def _vgg(self):
         pass
 
-    def _coco(self, id, image, category):
-        coco = {}
-        coco['id'] = int(id)
-        coco['image_id'] = image.id
-        coco['width'] = image.width
-        coco['height'] = image.height
-        coco['category_id'] = category.id
-        coco['area'] = self.area
-        coco['segmentations'] = self.polygons
-        coco['bbox'] = self.bbox.style(BBox.WIDTH_HEIGHT)
-        coco['metadata'] = self.metadata
-        return coco
+    def _coco(self, include=True):
+        
+        annotation = {
+            'id': self.id,
+            'image_id': self.image.id,
+            'category_id': self.category.id,
+            'width': self.image.width,
+            'height': self.image.height,
+            'area': self.area,
+            'segmentation': self.polygons.segmentation,
+            'bbox': self.bbox.bbox(style=BBox.WIDTH_HEIGHT),
+            'metadata': self.metadata
+        }
+
+        if include:
+            return {
+                'categories': [self.category._coco()],
+                'images': [self.image._coco(include=False)],
+                'annotations': [annotation]
+            }
+
+        return annotation
+    
+    def export(self, style=COCO):
+        return {
+            COCO: self._coco()
+        }.get(style)
+    
+    def save(self, file_path, style=COCO):
+        with open(file_path, 'w') as fp:
+            json.dump(self.export(style=style), fp, default=json_default)
+
 
 
 class BBox:
@@ -173,7 +198,6 @@ class BBox:
     def mask(self, width=None, height=None):
         if not self._c_mask:
 
-            size = height, width if height and width else self.max_point[1], self.max_point[0]
             mask = np.zeros((height, width))
             mask[self.min_point[1]:self.max_point[1], self.min_point[0]:self.max_point[0]] = 1
                 
@@ -313,6 +337,10 @@ class Polygons:
             ]
         
         return self._c_points
+
+    @property
+    def segmentation(self):
+        return self.polygons
 
     def __eq__(self, other):
         if isinstance(other, self.INSTANCE_TYPES):
