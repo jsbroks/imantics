@@ -3,9 +3,10 @@ import json
 import cv2
 
 from .styles import COCO
+from .basic import Semantic
 from .utils import json_default
 
-class Annotation:
+class Annotation(Semantic):
         
     @classmethod
     def from_mask(cls, image, category, mask):
@@ -36,7 +37,7 @@ class Annotation:
         self._init_with_mask = self._c_mask is not None
         self._init_with_polygons = self._c_polygons is not None
 
-        self.metadata = metadata
+        super().__init__(id, metadata)
 
     @property
     def mask(self):
@@ -79,15 +80,36 @@ class Annotation:
             return self.mask.area()
         return self.bbox.area
 
+    def index(self, annotation_index, category_index):
+        if self.id < 1:
+            self.id = len(annotation_index) + 1
+        
+        found = annotation_index.get(self.id)
+        if found:
+            # Increment index until not found
+            annotation_index.id = annotation_index.id + 1
+            self.index(annotation_index, category_index)
+        else:
+            annotation_index[self.id] = self
+
+            # Category indexing should be case insenstive
+            category_name = self.category.name.lower()
+
+            # Check if category exists
+            category_found = category_index.get(category_name)
+            if category_found:
+                # Update category
+                self.category = category_found
+            else:
+                # Index category
+                category_index[category_name] = self.category
+
     @property
     def size(self):
         return self.image.size
 
     def __contains__(self, item):
         return self.mask.contains(item)
-
-    def _vgg(self):
-        pass
 
     def _coco(self, include=True):
         
@@ -121,11 +143,6 @@ class Annotation:
         label = self.category.id
 
         return "{} {:.5f} {:.5f} {:.5f} {:.5f}".format(label, x, y, width, height)
-
-    def export(self, style=COCO):
-        return {
-            COCO: self._coco()
-        }.get(style)
     
     def save(self, file_path, style=COCO):
         with open(file_path, 'w') as fp:
@@ -295,7 +312,7 @@ class Polygons:
     
     _c_bbox = None
     _c_mask = None
-    
+
     _c_points = None
     _c_segmentation = None
 

@@ -1,10 +1,14 @@
-class Category:
+from .basic import Semantic
+
+
+class Category(Semantic):
 
     def __init__(self, name, parent=None, metadata={}, id=0):
         self.id = id
         self.name = name
-        self.metadata = metadata
         self.parent = None
+
+        super().__init__(id, metadata)
 
     def _coco(self, include=True):
 

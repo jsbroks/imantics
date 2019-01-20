@@ -9,5 +9,5 @@ def json_default(o):
         return o.tolist()
     
     type_name = o.__class__.__name__
-    raise TypeError(f"Object of type '{type_name}' is not JSON serializable")
+    raise TypeError("Object of type {} is not JSON serializable".format(type_name))
 

@@ -5,11 +5,12 @@ import json
 import numpy as np
 
 from .annotation import *
+from .basic import Semantic
 from .utils import json_default
 from .styles import COCO, VGG, VOC, YOLO
 
 
-class Image:
+class Image(Semantic):
     
     FORMATS = ('.png', '.jpg', '.jpeg', '.jpe', '.tiff', '.bmp', '.sr', '.ras')
 
@@ -26,8 +27,16 @@ class Image:
 
     @classmethod
     def from_path(cls, path):
+        """
+        Returns an array of images if path is a directory
+        Returns an image if path is a file
+        """
+        if os.path.isdir(path):
+            return Image.from_folder(path)
+        
         brg = cv2.imread(path)
         image_array = cv2.cvtColor(brg, cv2.COLOR_BGR2RGB)
+
         return cls(image_array, path=path)
 
     @classmethod
@@ -35,9 +44,7 @@ class Image:
         return cls([[[]]])
 
     def __init__(self, image_array, annotations=[], path="", id=0, metadata={}):
-        self.id = id
 
-        self.metadata = metadata
         self.annotations = {}
         self.categories = {}
 
@@ -53,7 +60,10 @@ class Image:
         self.size = (self.width, self.height)
         self.file_name = os.path.basename(self.path)
 
+        super().__init__(id, metadata)
+
     def add(self, annotation, category=None):
+        
         if isinstance(annotation, Mask):
             annotation = Annotation.from_mask(self, category, annotation)
 
@@ -65,8 +75,14 @@ class Image:
             
         self._index_annotation(annotation)
 
-    def _index_annotation(self, annotation):
+    def index(self, image_index, annotation_index, category_index):
         
+        image_index[self.path] = self
+
+        for annotation in self.annotations:
+            annotation.index(annotation_index, category_index)
+
+    def _index_annotation(self, annotation):      
         if annotation.id < 1:
             annotation.id = len(self.annotations) + 1
         
@@ -75,9 +91,16 @@ class Image:
             annotation.id = annotation.id + 1
             self._index_annotation(annotation)
         else:
-            category = annotation.category
             self.annotations[annotation.id] = annotation
-            self.categories[category.name] = category
+
+            category = annotation.category
+            category_name = category.name.lower()
+
+            category_found = self.categories.get(category_name)
+            if category_found:
+                annotation.category = category_found
+            else:
+                self.categories[category_found] = category
 
     def draw_masks(self, alpha=0.5):
 
@@ -149,14 +172,6 @@ class Image:
                 yolo.append(annotation._yolo())
         
         return yolo
-
-    def export(self, style=COCO):
-        return {
-            COCO: self._coco(),
-            VGG: None,
-            VOC: None,
-            YOLO: self._yolo()
-        }.get(style)
 
     def save(self, file_path, style=COCO):
         with open(file_path, 'w') as fp:
