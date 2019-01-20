@@ -97,7 +97,7 @@ class Annotation:
             'category_id': self.category.id,
             'width': self.image.width,
             'height': self.image.height,
-            'area': self.area,
+            'area': int(self.area),
             'segmentation': self.polygons.segmentation,
             'bbox': self.bbox.bbox(style=BBox.WIDTH_HEIGHT),
             'metadata': self.metadata
@@ -111,7 +111,17 @@ class Annotation:
             }
 
         return annotation
-    
+
+    def _yolo(self):
+        
+        height = self.bbox.height / self.image.height
+        width = self.bbox.width / self.image.width
+        x = self.bbox._xmin / self.image.width
+        y = self.bbox._ymin / self.image.height
+        label = self.category.id
+
+        return "{} {:.5f} {:.5f} {:.5f} {:.5f}".format(label, x, y, width, height)
+
     def export(self, style=COCO):
         return {
             COCO: self._coco()
@@ -165,18 +175,18 @@ class BBox:
 
         self.style = style if style else BBox.MIN_MAX
         
-        self._xmin = bbox[0]
-        self._ymin = bbox[1]
+        self._xmin = int(bbox[0])
+        self._ymin = int(bbox[1])
 
         if self.style == self.MIN_MAX:
-            self._xmax = bbox[2]
-            self._ymax = bbox[3]
+            self._xmax = int(bbox[2])
+            self._ymax = int(bbox[3])
             self.width = self._xmax - self._xmin
             self.height = self._ymax - self._ymin
 
         if self.style == self.WIDTH_HEIGHT:
-            self.width = bbox[2]
-            self.height = bbox[3]
+            self.width = int(bbox[2])
+            self.height = int(bbox[3])
             self._xmax = self._xmin + self.width
             self._ymax = self._ymin + self.height
         
@@ -285,7 +295,9 @@ class Polygons:
     
     _c_bbox = None
     _c_mask = None
+    
     _c_points = None
+    _c_segmentation = None
 
     def __init__(self, polygons):
         self.polygons = [np.array(polygon).flatten() for polygon in polygons]
@@ -340,7 +352,10 @@ class Polygons:
 
     @property
     def segmentation(self):
-        return self.polygons
+        if not self._c_segmentation:
+            self._c_segmentation = [polygon.tolist() for polygon in self.polygons]
+
+        return self._c_segmentation
 
     def __eq__(self, other):
         if isinstance(other, self.INSTANCE_TYPES):

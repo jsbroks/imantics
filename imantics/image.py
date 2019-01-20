@@ -135,16 +135,30 @@ class Image:
             }
 
         return coco
+    
+    def _yolo(self):
+        yolo = []
+        
+        categories = []
+        for _, category in self.categories.items():
+            category.id = len(categories) + 1
+            categories.append(category)
+        
+        for key, annotation in self.annotations.items():
+            if isinstance(key, int):
+                yolo.append(annotation._yolo())
+        
+        return yolo
 
     def export(self, style=COCO):
         return {
             COCO: self._coco(),
             VGG: None,
             VOC: None,
-            YOLO: None
+            YOLO: self._yolo()
         }.get(style)
 
     def save(self, file_path, style=COCO):
         with open(file_path, 'w') as fp:
-            json.dump(self.export(style=style), fp, default=json_default)
+            json.dump(self.export(style=style), fp)
 
