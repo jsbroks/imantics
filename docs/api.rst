@@ -1,5 +1,7 @@
-Annotations
-===========
+.. api
+
+API
+===
 
 .. module:: imantics
 
