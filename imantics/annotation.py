@@ -32,19 +32,60 @@ class Annotation(Semantic):
     def from_bbox(cls, image, category, bbox):
         """
         Creates annotation from bounding box
+
+        :param image: image assoicated with annotation
+        :type image: :class:`Image` 
+        :param category: category to label annotation
+        :type category: :class:`Category` 
+        :param polygons: bbox to create annotation from
+        :type polygons: :class:`BBox`, list, tuple
         """
         return cls(image, category, bbox=bbox)
     
     @classmethod
     def from_polygons(cls, image, category, polygons):
+        """
+        Creates annotation from polygons
+
+        Accepts following format for lists:
+
+        .. code-block:: python
+        
+            # Segmentation Format
+            [
+                [x1, y1, x2, y2, x3, y3,...],
+                [x1, y1, x2, y2, x3, y3,...],
+                ...
+            ]
+
+        or
+
+        .. code-block:: python
+
+            # Point Format
+            [
+                [[x1, y1], [x2, y2], [x3, y3],...],
+                [[x1, y1], [x2, y2], [x3, y3],...],
+                ...
+            ]
+        
+        *No sepcificaiton is reqiured between which
+        format is used*
+
+        :param image: image assoicated with annotation
+        :type image: :class:`Image` 
+        :param category: category to label annotation
+        :type category: :class:`Category` 
+        :param polygons: polygons to create annotation from
+        :type polygons: :class:`Polygons`, list
+        """
         return cls(image, category, polygons=polygons)
 
     def __init__(self, image, category, bbox=None, mask=None, polygons=None, id=0, color=None, metadata={}):
         
         assert isinstance(id, int), "id must be an integer"
         assert bbox or mask or polygons, "you must provide a mask, bbox or polygon"
-        
-        self.id = id
+
         self.image = image
         self.category = category
         

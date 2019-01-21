@@ -23,7 +23,9 @@ class Semantic:
         return {}
     
     def export(self, style=COCO):
-
+        """
+        Exports object into specified style
+        """
         return {
             COCO: self._coco(),
             VGG: self._vgg(),

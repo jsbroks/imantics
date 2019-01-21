@@ -11,9 +11,6 @@ from .styles import COCO, VGG, VOC, YOLO
 
 
 class Image(Semantic):
-    """
-
-    """
     
     FORMATS = ('.png', '.jpg', '.jpeg', '.jpe', '.tiff', '.bmp', '.sr', '.ras')
 
