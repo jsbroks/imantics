@@ -193,7 +193,15 @@ class Annotation(Semantic):
         return self.mask.contains(item)
 
     def _coco(self, include=True):
-        
+        """
+        Generates COCO format of annotation
+
+        :param include: True to include all COCO formats, Fale to generate just
+                        annotation format
+        :type include: bool
+        :returns: COCO format of annotation
+        :rtype: dict
+        """
         annotation = {
             'id': self.id,
             'image_id': self.image.id,
@@ -269,6 +277,11 @@ class BBox:
     
     @classmethod
     def create(cls, bbox):
+        """
+        Creates :class:`BBox`
+
+        Recommend over the use of ``__init__``.
+        """
         if isinstance(bbox, BBox.INSTANCE_TYPES):
             return BBox(bbox)
         
@@ -323,6 +336,12 @@ class BBox:
         return self._xmin, self._ymin, self.width, self.height
 
     def polygons(self):
+        """
+        Returns or generates :class:`Polygons` representation of bounding box.
+
+        :returns: Polygon representation
+        :rtype: :class:`Polygons`
+        """
         if not self._c_polygons:
             polygon = self.top_left + self.top_right \
                     + self.bottom_right + self.bottom_left
@@ -330,6 +349,12 @@ class BBox:
         return self._c_polygons
 
     def mask(self, width=None, height=None):
+        """
+        Returns or generates :class:`Mask` representation of bounding box.
+
+        :returns: Mask representation
+        :rtype: :class:`Mask`
+        """
         if not self._c_mask:
 
             mask = np.zeros((height, width))
@@ -483,6 +508,12 @@ class Polygons:
         self.polygons = [np.array(polygon).flatten() for polygon in polygons]
     
     def mask(self, width=None, height=None):
+        """
+        Returns or generates :class:`Mask` representation of polygons.
+
+        :returns: Mask representation
+        :rtype: :class:`Mask`
+        """
         if not self._c_mask:
 
             size = height, width if height and width else self.bbox().max_point
@@ -497,6 +528,12 @@ class Polygons:
         return self._c_mask
 
     def bbox(self):
+        """
+        Returns or generates :class:`BBox` representation of polygons.
+
+        :returns: Bounding Box representation
+        :rtype: :class:`BBox`
+        """
         if not self._c_bbox:
 
             y_min = x_min = float('inf')
@@ -522,6 +559,16 @@ class Polygons:
 
     @property
     def points(self):
+        """
+        Returns polygon in point format::
+
+            [
+                [[x1, y1], [x2, y2], [x3, y3], ...],
+                [[x1, y1], [x2, y2], [x3, y3], ...],
+                ...
+            ]
+        
+        """
         if not self._c_points:
             self._c_points = [
                 np.array(point).reshape(-1, 2).round().astype(int)
@@ -532,6 +579,16 @@ class Polygons:
 
     @property
     def segmentation(self):
+        """
+        Returns polygon in segmentation format::
+
+            [
+                [x1, y1, x2, y2, x3, y3, ...],
+                [x1, y1, x2, y2, x3, y3, ...],
+                ...
+            ]
+        
+        """
         if not self._c_segmentation:
             self._c_segmentation = [polygon.tolist() for polygon in self.polygons]
 
@@ -588,6 +645,12 @@ class Mask:
         self.array = np.array(array, dtype=bool)
     
     def bbox(self):
+        """
+        Returns or generates :class:`BBox` representation of mask.
+
+        :returns: Bounding Box representation
+        :rtype: :class:`BBox`
+        """
         if not self._c_bbox:
 
             # Generate bbox from mask
@@ -606,6 +669,12 @@ class Mask:
         return self._c_bbox
     
     def polygons(self):
+        """
+        Returns or generates :class:`Polygons` representation of mask.
+
+        :returns: Polygons representation
+        :rtype: :class:`Polygons`
+        """
         if not self._c_polygons:
 
             # Generate polygons from mask
@@ -622,9 +691,11 @@ class Mask:
     
     def union(self, other):
         """
-        Unites the array of the specified mask with this mask’s array and returns the result as a new mask.        
-        :param other: mask (or numpy array) to unite with
-        :return: resulting mask
+        Unites the array of the specified mask with this mask’s array and returns the result as a new mask.
+
+        :param other: mask to unite with
+        :type other: :class:`Mask`, numpy.ndarray
+        :return: resulting :class:`Mask`
         """
         if isinstance(other, np.ndarray):
             other = Mask(other)
@@ -639,8 +710,9 @@ class Mask:
         Intersects the array of the specified mask with this masks’s array
         and returns the result as a new mask.
 
-        :param other: mask (or numpy array) to intersect with
-        :return: resulting mask
+        :param other: mask to intersect with
+        :type other: :class:`Mask`, numpy.ndarray
+        :return: resulting :class:`Mask`
         """
         if isinstance(other, np.ndarray):
             other = Mask(other)
@@ -654,7 +726,8 @@ class Mask:
         """
         Intersect over union value of the specified masks
 
-        :param other: mask (or numpy array) to compute value with
+        :param other: mask to compute value with
+        :type other: :class:`Mask`, numpy.ndarray
         :return: resulting float value
         """
         i = self.intersect(other).sum()
@@ -666,12 +739,27 @@ class Mask:
         return i / float(u)
     
     def invert(self):
+        """
+        Inverts current mask
+
+        :return: resulting :class:`Mask`
+        """        
         return Mask(np.invert(self.array))
     
     def __invert__(self):
         return self.invert()
     
-    def apply(self, image, color=None, alpha=0.5):        
+    def apply(self, image, color=None, alpha=0.5): 
+        """
+        Draws current mask to the image array of shape (width, height, 3)
+        
+        *This function modifies the image array*
+
+        :param color: RGB color repersentation
+        :type color: tuple, list
+        :param alpha: opacity of mask
+        :type alpha: float
+        """       
         color = color if color else (255, 0, 0)
         for c in range(3):
             image[:, :, c] = np.where(
