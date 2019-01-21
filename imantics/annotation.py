@@ -7,13 +7,32 @@ from .basic import Semantic
 from .utils import json_default
 
 class Annotation(Semantic):
-        
+    """
+    Annotation is a marking on an image.
+
+    This class acts as a level ontop of :class:`BBox`, :class:`Mask` and :class:`Polygons`
+    to manage and generate other annotations or export formats.
+    """
+
     @classmethod
     def from_mask(cls, image, category, mask):
+        """
+        Creates annotation class from a mask
+
+        :param image: image assoicated with annotation
+        :type image: :class:`Image` 
+        :param category: category to label annotation
+        :type category: :class:`Category` 
+        :param mask: mask to create annotation from
+        :type mask: :class:`Mask`, numpy.ndarray, list
+        """
         return cls(image, category, mask=mask)
     
     @classmethod
     def from_bbox(cls, image, category, bbox):
+        """
+        Creates annotation from bounding box
+        """
         return cls(image, category, bbox=bbox)
     
     @classmethod
@@ -41,6 +60,9 @@ class Annotation(Semantic):
 
     @property
     def mask(self):
+        """
+        :returns: annotation's :class:`Mask` object
+        """
         if not self._c_mask:
             if self._init_with_polygons:
                 self._c_mask = self.polygons.mask(width=self.image.width, height=self.image.height)
@@ -51,11 +73,16 @@ class Annotation(Semantic):
     
     @property
     def array(self):
+        """
+        Numpy array boolean mask repsentation of the annotations
+        """
         return self.mask.array
 
     @property
     def polygons(self):
-
+        """
+        :class:`Polygons` repsentation of the annotations
+        """
         if not self._c_polygons:
             if self._init_with_mask:
                 self._c_polygons = self.mask.polygons()
@@ -66,6 +93,9 @@ class Annotation(Semantic):
 
     @property
     def bbox(self):
+        """
+        :class:`BBox` repsentation of the annotations
+        """
         if not self._c_bbox:   
             if self._init_with_polygons:
                 self._c_bbox = self.polygons.bbox()
@@ -76,19 +106,26 @@ class Annotation(Semantic):
 
     @property
     def area(self):
+        """
+        Qantity that expresses the extent of a two-dimensional figure
+        """
         if self._init_with_mask or self._init_with_polygons:
             return self.mask.area()
         return self.bbox.area
 
-    def index(self, annotation_index, category_index):
+    def index(self, image):
+        
+        annotation_index = image.annotations
+        category_index = image.categories
+
         if self.id < 1:
             self.id = len(annotation_index) + 1
         
         found = annotation_index.get(self.id)
         if found:
             # Increment index until not found
-            annotation_index.id = annotation_index.id + 1
-            self.index(annotation_index, category_index)
+            annotation_index.id += 1
+            self.index(image)
         else:
             annotation_index[self.id] = self
 
@@ -106,6 +143,9 @@ class Annotation(Semantic):
 
     @property
     def size(self):
+        """
+        Tuple of width and height
+        """
         return self.image.size
 
     def __contains__(self, item):
@@ -152,10 +192,16 @@ class Annotation(Semantic):
 
 class BBox:
     """
-    Bounding Box Class
+    Bounding Box is an enclosing retangular box for a image marking 
     """
+
+    #: Value types of :class:`BBox`
     INSTANCE_TYPES = (np.ndarray, list, tuple)
+
+    #: Bounding box format style [x1, y1, x2, y2]
     MIN_MAX = 'minmax'
+
+    #: Bounding box format style [x1, y1, width, height]
     WIDTH_HEIGHT = 'widthheight'
 
     @classmethod
@@ -459,9 +505,7 @@ class Mask:
     
     def union(self, other):
         """
-        Unites the array of the specified mask with this mask’s array and
-        returns the result as a new mask.
-        
+        Unites the array of the specified mask with this mask’s array and returns the result as a new mask.        
         :param other: mask (or numpy array) to unite with
         :return: resulting mask
         """

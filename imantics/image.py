@@ -11,6 +11,9 @@ from .styles import COCO, VGG, VOC, YOLO
 
 
 class Image(Semantic):
+    """
+
+    """
     
     FORMATS = ('.png', '.jpg', '.jpeg', '.jpe', '.tiff', '.bmp', '.sr', '.ras')
 
@@ -43,15 +46,18 @@ class Image(Semantic):
     def empty(cls):
         return cls([[[]]])
 
+    annotations = {}
+    categories = {}
+
     def __init__(self, image_array, annotations=[], path="", id=0, metadata={}):
 
         self.annotations = {}
         self.categories = {}
 
-        # index annotation
+        # Index annotation
         for index, annotation in enumerate(annotations):
             annotation.id = index+1
-            self._index_annotation(annotation)
+            annotation.index(self)
 
         self.array = np.array(image_array)
         self.path = path
@@ -63,7 +69,18 @@ class Image(Semantic):
         super().__init__(id, metadata)
 
     def add(self, annotation, category=None):
-        
+        """
+        Adds a annotaiton, list of annotaitons, mask, polygon or bbox to current image.
+        If annotation is not a Annotation a category is required
+        List of non-Annotaiton objects will have the same category
+
+        :param annotation: annotaiton to add to current image
+        :param category: required if annotation is not an Annotation object
+        """
+        if isinstance(annotation, list):
+            for ann in annotation:
+                self.add(ann)
+
         if isinstance(annotation, Mask):
             annotation = Annotation.from_mask(self, category, annotation)
 
@@ -72,35 +89,16 @@ class Image(Semantic):
 
         if isinstance(annotation, Polygons):
             annotation = Annotation.from_polygons(self, category, annotation)
-            
-        self._index_annotation(annotation)
-
-    def index(self, image_index, annotation_index, category_index):
         
+        annotation.index(self)
+
+    def index(self, dataset):
+        
+        image_index = dataset.images
         image_index[self.path] = self
 
         for annotation in self.annotations:
-            annotation.index(annotation_index, category_index)
-
-    def _index_annotation(self, annotation):      
-        if annotation.id < 1:
-            annotation.id = len(self.annotations) + 1
-        
-        found = self.annotations.get(annotation.id)
-        if found:
-            annotation.id = annotation.id + 1
-            self._index_annotation(annotation)
-        else:
-            self.annotations[annotation.id] = annotation
-
-            category = annotation.category
-            category_name = category.name.lower()
-
-            category_found = self.categories.get(category_name)
-            if category_found:
-                annotation.category = category_found
-            else:
-                self.categories[category_found] = category
+            annotation.index(dataset)
 
     def draw_masks(self, alpha=0.5):
 
@@ -119,8 +117,7 @@ class Image(Semantic):
         temp_image.setflags(write=True)
 
         for key, annotation in self.annotations.items():
-            if isinstance(key, int):
-                annotation.bbox.apply(temp_image, thickness=thickness)
+            annotation.bbox.apply(temp_image, thickness=thickness)
             
         return temp_image
 
@@ -147,9 +144,8 @@ class Image(Semantic):
 
             annotations = []
             for key, annotation in self.annotations.items():
-                if isinstance(key, int):
-                    annotation.id = len(annotations) + 1
-                    annotations.append(annotation._coco(include=False))
+                annotation.id = len(annotations) + 1
+                annotations.append(annotation._coco(include=False))
 
             return {
                 'categories': categories,
@@ -168,8 +164,7 @@ class Image(Semantic):
             categories.append(category)
         
         for key, annotation in self.annotations.items():
-            if isinstance(key, int):
-                yolo.append(annotation._yolo())
+            yolo.append(annotation._yolo())
         
         return yolo
 
