@@ -4,6 +4,7 @@
 [![GitHub Issues](https://img.shields.io/github/issues/jsbroks/imantics.svg)](https://github.com/jsbroks/imantics/issues)
 ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)
 [![Build Status](https://travis-ci.org/jsbroks/imantics.svg?branch=master)](https://travis-ci.org/jsbroks/imantics)
+[![Documentation Status](https://readthedocs.org/projects/imantics/badge/?version=latest)](https://imantics.readthedocs.io/en/latest/?badge=latest)
 ![Python Versions](https://img.shields.io/pypi/pyversions/3.svg)
 
 > Currently a work in progress!
