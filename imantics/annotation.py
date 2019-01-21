@@ -102,7 +102,7 @@ class Annotation(Semantic):
     @property
     def mask(self):
         """
-        :returns: annotation's :class:`Mask` object
+        :class:`Mask` repsentation of the annotations
         """
         if not self._c_mask:
             if self._init_with_polygons:
@@ -247,10 +247,24 @@ class BBox:
 
     @classmethod
     def from_mask(cls, mask):
+        """
+        Creates bounding box from mask
+
+        :param mask: object to genereate bounding box
+        :type mask: :class:`Mask`, numpy.ndarray, list
+        :returns: :class:`BBox` repersentation
+        """
         return mask.bbox()
     
     @classmethod
     def from_polygons(cls, polygons):
+        """
+        Creates bounding box from polygons
+
+        :param polygons: object to genereate bounding box
+        :type polygons: :class:`Polygons`, list
+        :returns: :class:`BBox` repersentation
+        """
         return polygons.bbox()
     
     @classmethod
@@ -265,16 +279,16 @@ class BBox:
     
     @classmethod
     def empty(cls):
+        """
+        :returns: Empty :class:`BBox` object
+        """
         return BBox((0, 0, 0, 0))
 
     _c_polygons = None
     _c_mask = None
 
     def __init__(self, bbox, style=None):
-        """
-        :param bbox:
-        :param style: maxmin or widthheight
-        """
+
         assert len(bbox) == 4
 
         self.style = style if style else BBox.MIN_MAX
@@ -297,6 +311,12 @@ class BBox:
         self.area = self.width * self.height
 
     def bbox(self, style=None):
+        """
+        Generates tuple repersentation of bounding box
+
+        :param style: stlye to generate bounding box (defaults: MIN_MAX)
+        :returns: tuple of bounding box with specified style
+        """
         style = style if style else self.style
         if style == self.MIN_MAX:
             return self._xmin, self._ymin, self._xmax, self._ymax
@@ -320,35 +340,90 @@ class BBox:
         return self._c_mask
 
     def apply(self, image, color=None, thickness=2):
+        """
+        Draws a bounding box to the image array of shape (width, height, 3)
+        
+        *This function modifies the image array*
+
+        :param color: RGB color repersentation
+        :type color: tuple, list
+        :param thickness: pixel thickness of box
+        :type thinkness: int
+        """
         color = color if color else (255, 0, 0)
         cv2.rectangle(image, self.min_point, self.max_point, color, thickness)
 
     @property
     def min_point(self):
+        """
+        Minimum points of the bounding box (x1, y1)
+        """
         return self._xmin, self._ymin
 
     @property
     def max_point(self):
+        """
+        Maximum points of the bounding box (x2, y2)
+        """
         return self._xmax, self._ymax
     
     @property
     def top_right(self):
+        """
+        Tops right point of the bounding box::
+
+            [ ]------[X]
+             |        |
+             |        |
+            [ ]------[ ]
+        
+        """
         return self._xmax, self._ymin
 
     @property
     def top_left(self):
+        """
+        Tops left point of the bounding box::
+
+            [X]------[ ]
+             |        |
+             |        |
+            [ ]------[ ]
+        
+        """
         return self._xmin, self._ymax
         
     @property
     def bottom_right(self):
+        """
+        Tops left point of the bounding box::
+
+            [ ]------[ ]
+             |        |
+             |        |
+            [ ]------[X]
+        
+        """
         return self._xmax, self._ymax
 
     @property
     def bottom_left(self):
+        """
+        Tops left point of the bounding box::
+
+            [ ]------[ ]
+             |        |
+             |        |
+            [X]------[ ]
+        
+        """
         return self._xmin, self._ymax
     
     @property
     def size(self):
+        """
+        Width and height as a tuple (width, height)
+        """
         return self.width, self.height
 
     def _compute_size(self):
@@ -376,6 +451,7 @@ class BBox:
 
 class Polygons:
     
+    #: Polygon instance types
     INSTANCE_TYPES = (list, tuple)
 
     @classmethod
