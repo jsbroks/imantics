@@ -62,8 +62,8 @@ class Image(Semantic):
         return cls(**data)
 
     @classmethod
-    def empty(cls):
-        return cls([[[]]])
+    def empty(cls, width=0, height=0):
+        return cls(width=width, height=height)
 
     annotations = {}
     categories = {}
@@ -79,10 +79,10 @@ class Image(Semantic):
             annotation.index(self)
 
         self.path = path
-        if image_array:
-            self.array = image_array
-        else:
+        if image_array is None:
             self.array = np.zeros((height, width, 3)).astype(np.uint8)
+        else:
+            self.array = image_array
         
         self.height, self.width, _ = self.array.shape
         
@@ -106,8 +106,14 @@ class Image(Semantic):
             return
 
         if isinstance(annotation, Mask):
-            annotation = Annotation.from_mask(self, category, annotation)
 
+            height, width = annotation.array.shape[:2]
+            if width == self.width and height == self.height:
+                annotation = Annotation.from_mask(self, category, annotation)
+            else:
+                raise ValueError('Cannot add annotaiton of size {} to image of size {}'\
+                                 .format(annotation.array.shape, (self.height, self.width)))
+            
         if isinstance(annotation, BBox):
             annotation = Annotation.from_bbox(self, category, annotation)
 

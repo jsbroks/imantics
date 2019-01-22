@@ -111,7 +111,7 @@ class Annotation(Semantic):
                 self._c_mask = self.bbox.mask(width=self.image.width, height=self.image.height)
         
         return self._c_mask
-    
+
     @property
     def array(self):
         """
@@ -189,8 +189,14 @@ class Annotation(Semantic):
         """
         return self.image.size
 
-    def __contains__(self, item):
+    def contains(self, item):
+         if isinstance(item, Annotation):
+            item = item.mask
+
         return self.mask.contains(item)
+
+    def __contains__(self, item):
+        return self.contains(item)
 
     def _coco(self, include=True):
         """
@@ -238,7 +244,6 @@ class Annotation(Semantic):
             json.dump(self.export(style=style), fp, default=json_default)
 
 
-
 class BBox:
     """
     Bounding Box is an enclosing retangular box for a image marking 
@@ -256,9 +261,9 @@ class BBox:
     @classmethod
     def from_mask(cls, mask):
         """
-        Creates bounding box from mask
+        Creates :class:`BBox` from mask
 
-        :param mask: object to genereate bounding box
+        :param mask: object to generate bounding box
         :type mask: :class:`Mask`, numpy.ndarray, list
         :returns: :class:`BBox` repersentation
         """
@@ -267,9 +272,9 @@ class BBox:
     @classmethod
     def from_polygons(cls, polygons):
         """
-        Creates bounding box from polygons
+        Creates :class:`BBox` from polygons
 
-        :param polygons: object to genereate bounding box
+        :param polygons: object to generate bounding box
         :type polygons: :class:`Polygons`, list
         :returns: :class:`BBox` repersentation
         """
@@ -481,10 +486,24 @@ class Polygons:
 
     @classmethod
     def from_mask(cls, mask):
+        """
+        Creates :class:`Polygons` from mask
+
+        :param mask: object to generate mask
+        :type mask: :class:`Mask`, numpy.ndarray, list
+        :returns: :class:`Polygons` repersentation
+        """
         return mask.polygons()
 
     @classmethod
     def from_bbox(cls, bbox, style=None):
+        """
+        Creates :class:`Polygons` from bounding box
+
+        :param bbox: object to generate bounding box
+        :type bbox: :class:`BBox`, list, tuple
+        :returns: :class:`Polygons` repersentation
+        """
         return bbox.polygons()
         
     @classmethod
@@ -788,10 +807,11 @@ class Mask:
     def contains(self, item):
         """
         Checks whether a point (tuple), array or mask is within current mask.
+        
         Note: Masks and arrays must be fully contained to return True
         
         :param item: object to check
-        :return: boolean if item is contained
+        :return: bool if item is contained
         """
         if isinstance(item, tuple):
             array = self.array
@@ -810,6 +830,17 @@ class Mask:
     def __contains__(self, item):
         return self.contains(item)
     
+    def match(self, item, threshold=0.5):
+        """
+        Given a overlap threashold determines if masks match
+
+        :param item: item to compare with
+        :type item: :class:`Mask`
+        :param threshold: max amount of overlap (percentage)
+        :returns: boolean determining if the items match
+        """
+        return self.iou(item) >= threshold
+
     def sum(self):
         return self.array.sum()
 
