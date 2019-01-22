@@ -767,7 +767,6 @@ class Mask:
                 image[:, :, c] * (1 - alpha) + alpha * color[c],
                 image[:, :, c]
             )
-        
         return image
 
     def subtract(self, other):

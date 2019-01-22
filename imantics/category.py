@@ -3,6 +3,16 @@ from .basic import Semantic
 
 class Category(Semantic):
 
+    @classmethod
+    def from_coco(cls, coco):
+        data = {
+            'name': coco.get('name'),
+            'metadata': coco.get('metadata', {}),
+            'id': coco.get('id', 0),
+            'parent': coco.get('supercategory')
+        }
+        return cls(**data)
+
     def __init__(self, name, parent=None, metadata={}, id=0):
         self.id = id
         self.name = name

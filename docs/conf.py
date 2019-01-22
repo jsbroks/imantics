@@ -100,7 +100,12 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
+html_use_smartypants = True
+
+html_sidebars = {
+    'index': ['globaltoc.html', 'searchbox.html'],
+    '**': ['localtoc.html', 'relations.html', 'searchbox.html']
+}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------

@@ -40,13 +40,35 @@ class Image(Semantic):
         return cls(image_array, path=path)
 
     @classmethod
+    def from_coco(cls, coco):
+
+        metadata = coco.get('metadata', {})
+
+        metadata.update({
+            'license': coco.get('license'),
+            'flickr_url': coco.get('flickr_url'),
+            'coco_url': coco.get('coco_url'),
+            'date_captured': coco.get('date_captured')
+        })
+
+        data = {
+            'id': coco.get('id', 0),
+            'width': coco.get('width', 0),
+            'height': coco.get('height', 0),
+            'path': coco.get('path', coco.get('file_name', '')),
+            'metadata': metadata
+        }
+
+        return cls(**data)
+
+    @classmethod
     def empty(cls):
         return cls([[[]]])
 
     annotations = {}
     categories = {}
 
-    def __init__(self, image_array, annotations=[], path="", id=0, metadata={}):
+    def __init__(self, image_array=None, annotations=[], path="", id=0, metadata={}, width=0, height=0):
 
         self.annotations = {}
         self.categories = {}
@@ -56,10 +78,14 @@ class Image(Semantic):
             annotation.id = index+1
             annotation.index(self)
 
-        self.array = np.array(image_array)
         self.path = path
-
+        if image_array:
+            self.array = image_array
+        else:
+            self.array = np.zeros((height, width, 3)).astype(np.uint8)
+        
         self.height, self.width, _ = self.array.shape
+        
         self.size = (self.width, self.height)
         self.file_name = os.path.basename(self.path)
 
@@ -92,7 +118,7 @@ class Image(Semantic):
     def index(self, dataset):
         
         image_index = dataset.images
-        image_index[self.path] = self
+        image_index[self.id] = self
 
         for annotation in self.annotations:
             annotation.index(dataset)
@@ -103,17 +129,15 @@ class Image(Semantic):
         temp_image.setflags(write=True)
 
         for key, annotation in self.annotations.items():
-            if isinstance(key, int):
-                annotation.mask.apply(temp_image, alpha=alpha)
+            annotation.mask.apply(temp_image, alpha=alpha)
         
         return temp_image
         
     def draw_bboxs(self, thickness=3):
-
         temp_image = self.array.copy()
         temp_image.setflags(write=True)
 
-        for key, annotation in self.annotations.items():
+        for _, annotation in self.annotations.items():
             annotation.bbox.apply(temp_image, thickness=thickness)
             
         return temp_image
@@ -140,7 +164,7 @@ class Image(Semantic):
                 categories.append(category._coco(include=False))
 
             annotations = []
-            for key, annotation in self.annotations.items():
+            for _, annotation in self.annotations.items():
                 annotation.id = len(annotations) + 1
                 annotations.append(annotation._coco(include=False))
 
@@ -150,7 +174,7 @@ class Image(Semantic):
                 'annotations': annotations
             }
 
-        return coco
+        return image
     
     def _yolo(self):
         yolo = []
