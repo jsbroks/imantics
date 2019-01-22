@@ -115,8 +115,18 @@ class Dataset(Semantic):
 
         print(percents)
 
-    def _coco(self, include=True):
-        pass
+    def _coco(self):
+        coco = {
+            'info': {},
+            'categories': [],
+            'images': [],
+            'annotations': []
+        }
+
+        for image in images:
+            coco['images'].extend(image._coco(include=False))
+        
+        return coco
     
     def _yolo(self):
         pass

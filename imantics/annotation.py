@@ -368,7 +368,7 @@ class BBox:
 
         return self._c_mask
 
-    def apply(self, image, color=None, thickness=2):
+    def draw(self, image, color=None, thickness=2):
         """
         Draws a bounding box to the image array of shape (width, height, 3)
         
@@ -767,7 +767,7 @@ class Mask:
     def __invert__(self):
         return self.invert()
     
-    def apply(self, image, color=None, alpha=0.5): 
+    def draw(self, image, color=None, alpha=0.5): 
         """
         Draws current mask to the image array of shape (width, height, 3)
         

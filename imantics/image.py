@@ -68,8 +68,9 @@ class Image(Semantic):
     annotations = {}
     categories = {}
 
-    def __init__(self, image_array=None, annotations=[], path="", id=0, metadata={}, width=0, height=0):
+    def __init__(self, image_array=None, annotations=[], path="", id=0, metadata={}, dataset=None, width=0, height=0):
 
+        self.dataset = dataset
         self.annotations = {}
         self.categories = {}
 
@@ -136,7 +137,7 @@ class Image(Semantic):
         temp_image.setflags(write=True)
 
         for key, annotation in self.annotations.items():
-            annotation.mask.apply(temp_image, alpha=alpha)
+            annotation.mask.draw(temp_image, alpha=alpha)
         
         return temp_image
         
@@ -145,7 +146,7 @@ class Image(Semantic):
         temp_image.setflags(write=True)
 
         for _, annotation in self.annotations.items():
-            annotation.bbox.apply(temp_image, thickness=thickness)
+            annotation.bbox.draw(temp_image, thickness=thickness)
             
         return temp_image
 
