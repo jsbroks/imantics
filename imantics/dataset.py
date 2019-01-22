@@ -72,6 +72,11 @@ class Dataset(Semantic):
         :param image: list, object or path to add to dataset
         :type image: :class:`Image` :class:`Annotation`, list, typle, path
         """
+        if isinstance(image, (list, tuple)):
+            for img in image:
+                img.index(self)
+            return
+        
         if isinstance(image, Annotation):
             annotation = image
             image = self.images.get(annotation.image.id)
@@ -82,11 +87,7 @@ class Dataset(Semantic):
 
         if isinstance(image, str):
             image = Image.from_path(image)
-        
-        if isinstance(image, (list, tuple)):
-            for img in image:
-                img.index(self)
-        
+                
         image.index(self)
     
     def split(self, ratios, random=False):
