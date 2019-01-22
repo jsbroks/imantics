@@ -188,11 +188,10 @@ class Annotation(Semantic):
         Tuple of width and height
         """
         return self.image.size
-
+    
     def contains(self, item):
-         if isinstance(item, Annotation):
+        if isinstance(item, Annotation):
             item = item.mask
-
         return self.mask.contains(item)
 
     def __contains__(self, item):
