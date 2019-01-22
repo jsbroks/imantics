@@ -103,6 +103,7 @@ class Image(Semantic):
         if isinstance(annotation, list):
             for ann in annotation:
                 self.add(ann)
+            return
 
         if isinstance(annotation, Mask):
             annotation = Annotation.from_mask(self, category, annotation)
