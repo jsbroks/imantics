@@ -14,13 +14,6 @@ Annotation Object
    :members:
    :inherited-members:
 
-Dataset Object
----------------
-
-.. autoclass:: Dataset
-   :members:
-   :inherited-members:
-
 Bounding Box Object
 -------------------
 
@@ -32,6 +25,20 @@ Category Object
 -------------------
 
 .. autoclass:: Category
+   :members:
+   :inherited-members:
+
+Color Object
+-------------------
+
+.. autoclass:: Color
+   :members:
+   :inherited-members:
+
+Dataset Object
+---------------
+
+.. autoclass:: Dataset
    :members:
    :inherited-members:
 
