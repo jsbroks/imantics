@@ -40,7 +40,7 @@ class Image(Semantic):
         return cls(image_array, path=path)
 
     @classmethod
-    def from_coco(cls, coco):
+    def from_coco(cls, coco, dataset=None):
 
         metadata = coco.get('metadata', {})
 
@@ -56,7 +56,8 @@ class Image(Semantic):
             'width': coco.get('width', 0),
             'height': coco.get('height', 0),
             'path': coco.get('path', coco.get('file_name', '')),
-            'metadata': metadata
+            'metadata': metadata,
+            'dataset': dataset
         }
 
         return cls(**data)
@@ -131,23 +132,30 @@ class Image(Semantic):
         for annotation in self.annotations:
             annotation.index(dataset)
 
-    def draw_masks(self, alpha=0.5):
+    def draw_masks(self, image=None, alpha=0.5, categories=None, color_by_category=False):
 
-        temp_image = self.array.copy()
+        temp_image = image.copy() if image is not None else self.array.copy()
         temp_image.setflags(write=True)
-
-        for key, annotation in self.annotations.items():
-            annotation.mask.draw(temp_image, alpha=alpha)
+        
+        for _, annotation in self.annotations.items():
+            category = annotation.category
+            if  (categories is None) or (category in categories):
+                color = category.color if color_by_category else annotation.color
+                annotation.mask.draw(temp_image, alpha=alpha, color=color)
         
         return temp_image
         
-    def draw_bboxs(self, thickness=3):
-        temp_image = self.array.copy()
+    def draw_bboxs(self, image=None, thickness=3, categories=None, color_by_category=False):
+
+        temp_image = image.copy() if image is not None else self.array.copy()
         temp_image.setflags(write=True)
 
         for _, annotation in self.annotations.items():
-            annotation.bbox.draw(temp_image, thickness=thickness)
-            
+            category = annotation.category
+            if  (categories is None) or (category in categories):
+                color = category.color if color_by_category else annotation.color
+                annotation.bbox.draw(temp_image, thickness=thickness, color=color)
+        
         return temp_image
 
     def _coco(self, include=True):

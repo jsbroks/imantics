@@ -2,9 +2,10 @@ import numpy as np
 import json
 import cv2
 
+from .color import Color
 from .styles import COCO
 from .basic import Semantic
-from .utils import json_default
+
 
 class Annotation(Semantic):
     """
@@ -88,6 +89,7 @@ class Annotation(Semantic):
 
         self.image = image
         self.category = category
+        self.color = Color.create(color)
         
         self._c_bbox = BBox.create(bbox)
         self._c_mask = Mask.create(mask)
@@ -240,7 +242,7 @@ class Annotation(Semantic):
     
     def save(self, file_path, style=COCO):
         with open(file_path, 'w') as fp:
-            json.dump(self.export(style=style), fp, default=json_default)
+            json.dump(self.export(style=style), fp)
 
 
 class BBox:
@@ -379,7 +381,7 @@ class BBox:
         :param thickness: pixel thickness of box
         :type thinkness: int
         """
-        color = color if color else (255, 0, 0)
+        color = Color.create(color).rgb
         cv2.rectangle(image, self.min_point, self.max_point, color, thickness)
 
     @property
@@ -778,7 +780,7 @@ class Mask:
         :param alpha: opacity of mask
         :type alpha: float
         """       
-        color = color if color else (255, 0, 0)
+        color = Color.create(color).rgb
         for c in range(3):
             image[:, :, c] = np.where(
                 self.array,

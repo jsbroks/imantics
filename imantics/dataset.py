@@ -32,7 +32,7 @@ class Dataset(Semantic):
                 index_categories[category.id] = category
 
             for image in coco_images:
-                image = Image.from_coco(image)
+                image = Image.from_coco(image, dataset=dataset)
                 dataset.add(image)
 
             for annotation in coco_annotations:

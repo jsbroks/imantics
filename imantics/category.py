@@ -1,4 +1,5 @@
 from .basic import Semantic
+from .color import Color
 
 
 class Category(Semantic):
@@ -13,10 +14,11 @@ class Category(Semantic):
         }
         return cls(**data)
 
-    def __init__(self, name, parent=None, metadata={}, id=0):
+    def __init__(self, name, parent=None, metadata={}, id=0, color=None):
         self.id = id
         self.name = name
         self.parent = None
+        self.color = Color.create(color)
 
         super().__init__(id, metadata)
 
