@@ -1,4 +1,7 @@
 
+from lxml import etree as ET    
+from lxml.builder import E
+
 import os
 import cv2
 import json
@@ -200,10 +203,30 @@ class Image(Semantic):
             category.id = len(categories) + 1
             categories.append(category)
         
-        for key, annotation in self.annotations.items():
+        for _, annotation in self.annotations.items():
             yolo.append(annotation._yolo())
         
         return yolo
+
+    def _voc(self):
+
+        annotations = []
+        for _, annotation in self.annotations.items():
+            annotations.append(annotation._voc())
+        
+        element = E('annotation',
+            E('folder', self.path[: -1*(len(self.file_name)+1)]),
+            E('path', self.path),
+            E('filename', self.file_name),
+            E('size',
+                E('width', str(self.width)),
+                E('height', str(self.height)),
+                E('depth', str(3))
+            ),
+            *annotations
+        )
+        
+        return element
 
     def save(self, file_path, style=COCO):
         with open(file_path, 'w') as fp:

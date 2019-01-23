@@ -1,3 +1,5 @@
+from lxml import etree as ET    
+from lxml.builder import E
 import numpy as np
 import json
 import cv2
@@ -191,6 +193,9 @@ class Annotation(Semantic):
         """
         return self.image.size
     
+    def truncated(self):
+        return len(self.polygons.segmentation) > 1
+
     def contains(self, item):
         if isinstance(item, Annotation):
             item = item.mask
@@ -239,6 +244,23 @@ class Annotation(Semantic):
         label = self.category.id
 
         return "{} {:.5f} {:.5f} {:.5f} {:.5f}".format(label, x, y, width, height)
+    
+    def _voc(self):
+
+        element = E('object',
+            E('name', self.category.name),
+            E('pose', self.metadata.get('pose', 'Unspecified')),
+            E('truncated', str(1 if self.truncated() else 0)),
+            E('difficult', str(self.metadata.get('difficult', 0))),
+            E('bndbox',
+                E('xmin', str(self.bbox._xmin)),
+                E('ymin', str(self.bbox._ymin)),
+                E('xmax', str(self.bbox._xmax)),
+                E('ymax', str(self.bbox._ymax)),
+            )
+        )
+        
+        return element
     
     def save(self, file_path, style=COCO):
         with open(file_path, 'w') as fp:
