@@ -6,6 +6,7 @@
 [![Build Status](https://travis-ci.org/jsbroks/imantics.svg?branch=master)](https://travis-ci.org/jsbroks/imantics)
 [![Documentation Status](https://readthedocs.org/projects/imantics/badge/?version=latest)](https://imantics.readthedocs.io/en/latest/?badge=latest)
 ![Python Versions](https://img.shields.io/pypi/pyversions/3.svg)
+![PyPi](https://img.shields.io/pypi/v/imantics.svg)
 
 > Currently a work in progress!
 
@@ -21,7 +22,5 @@ Currently Support Formats:
 ## Installing
 
 ```
-git clone https://github.com/jsbroks/imantics
-cd imantics
-pip install .
+pip install imantics
 ```
