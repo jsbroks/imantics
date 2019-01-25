@@ -135,7 +135,7 @@ class Image(Semantic):
         for annotation in self.annotations:
             annotation.index(dataset)
 
-    def draw_masks(self, image=None, alpha=0.5, categories=None, color_by_category=False):
+    def draw_masks(self, image=None, alpha=0.5, thickness=3, categories=None, color_by_category=False):
 
         temp_image = image.copy() if image is not None else self.array.copy()
         temp_image.setflags(write=True)
@@ -145,6 +145,7 @@ class Image(Semantic):
             if  (categories is None) or (category in categories):
                 color = category.color if color_by_category else annotation.color
                 annotation.mask.draw(temp_image, alpha=alpha, color=color)
+                annotation.polygons.draw(temp_image, color=color, thickness=thickness)
         
         return temp_image
         

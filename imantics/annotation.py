@@ -636,6 +636,10 @@ class Polygons:
 
         return self._c_segmentation
 
+    def draw(self, image, color=None, thickness=3): 
+        color = Color.create(color).rgb
+        cv2.polylines(image, self.points, True, color, thickness)
+
     def __eq__(self, other):
         if isinstance(other, self.INSTANCE_TYPES):
             other = Polygons(other)
