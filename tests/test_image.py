@@ -5,17 +5,15 @@ class TestImageCreate:
     def test_create_empty(self):
         width, height = (50, 100)
         image = Image.empty(width=width, height=height)
-        draw_bbox = image.draw_bboxs()
-        draw_mask = image.draw_masks()
+        draw = image.draw()
 
         assert image.height == height
         assert image.width == width
         assert image.array.shape == (height, width, 3)
-        assert len(image.annotations) == 0
-        assert len(image.categories) == 0
+        assert len(image.i_annotations) == 0
+        assert len(image.i_categories) == 0
 
-        assert draw_bbox.shape == (height, width, 3)
-        assert draw_mask.shape == (height, width, 3)
+        assert draw.shape == (height, width, 3)
     
     def test_image_from_path(self):
         path = 'examples/data/tesla.jpg'

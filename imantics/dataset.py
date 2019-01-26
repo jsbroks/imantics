@@ -90,6 +90,19 @@ class Dataset(Semantic):
                 
         image.index(self)
     
+    def iter_images(self):
+        for _, image in self.images.items():
+            yield image
+
+    def iter_annotations(self):
+        for key, annotation in self.annotations.items():
+            if isinstance(key, int):
+                yield annotation
+
+    def iter_categories(self):
+        for _, category in self.categories.items():
+            yield category
+
     def split(self, ratios, random=False):
         """
         Splits dataset images into mutiple sub datasets of the given ratios
@@ -118,13 +131,10 @@ class Dataset(Semantic):
     def _coco(self):
         coco = {
             'info': {},
-            'categories': [],
-            'images': [],
-            'annotations': []
+            'categories': [c._coco() for c in self.iter_categories()],
+            'images': [i._coco(include=False) for i in self.iter_images()],
+            'annotations': [a._coco(include=False) for a in self.iter_annotations()]
         }
-
-        for image in images:
-            coco['images'].extend(image._coco(include=False))
         
         return coco
     

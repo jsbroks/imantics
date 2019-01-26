@@ -132,35 +132,39 @@ class Image(Semantic):
         image_index = dataset.images
         image_index[self.id] = self
 
-        for annotation in self.annotations:
+        for annotation in self.iter_annotations():
             annotation.index(dataset)
 
-    def draw_masks(self, image=None, alpha=0.5, thickness=3, categories=None, color_by_category=False):
+    def draw(self, bbox=True, outline=True, mask=True, thickness=3, \
+             alpha=0.5, categories=None, color_by_category=False):
 
-        temp_image = image.copy() if image is not None else self.array.copy()
+        temp_image = self.array.copy()
         temp_image.setflags(write=True)
-        
-        for _, annotation in self.annotations.items():
+
+        for annotation in self.iter_annotations():
             category = annotation.category
             if  (categories is None) or (category in categories):
                 color = category.color if color_by_category else annotation.color
-                annotation.mask.draw(temp_image, alpha=alpha, color=color)
-                annotation.polygons.draw(temp_image, color=color, thickness=thickness)
-        
-        return temp_image
-        
-    def draw_bboxs(self, image=None, thickness=3, categories=None, color_by_category=False):
 
-        temp_image = image.copy() if image is not None else self.array.copy()
-        temp_image.setflags(write=True)
+                if mask:
+                    annotation.mask.draw(temp_image, alpha=alpha, color=color)
+                
+                if outline:
+                    annotation.polygons.draw(temp_image, color=color, thickness=thickness)
 
-        for _, annotation in self.annotations.items():
-            category = annotation.category
-            if  (categories is None) or (category in categories):
-                color = category.color if color_by_category else annotation.color
-                annotation.bbox.draw(temp_image, thickness=thickness, color=color)
-        
-        return temp_image
+                if bbox:
+                    annotation.bbox.draw(temp_image, thickness=thickness, color=color)
+
+        return temp_image       
+
+    def iter_annotations(self):
+        for key, annotation in self.annotations.items():
+            if isinstance(key, int):
+                yield annotation
+
+    def iter_categories(self):
+        for key, category in self.categories.items():
+            yield category
 
     def _coco(self, include=True):
         image = {
@@ -179,12 +183,12 @@ class Image(Semantic):
         if include:
             
             categories = []
-            for _, category in self.categories.items():
+            for category in self.iter_categories():
                 category.id = len(categories) + 1
                 categories.append(category._coco(include=False))
 
             annotations = []
-            for _, annotation in self.annotations.items():
+            for annotation in self.iter_annotations():
                 annotation.id = len(annotations) + 1
                 annotations.append(annotation._coco(include=False))
 
@@ -200,11 +204,11 @@ class Image(Semantic):
         yolo = []
         
         categories = []
-        for _, category in self.categories.items():
+        for category in self.iter_categories():
             category.id = len(categories) + 1
             categories.append(category)
         
-        for _, annotation in self.annotations.items():
+        for annotation in self.iter_annotations():
             yolo.append(annotation._yolo())
         
         return yolo
@@ -212,7 +216,7 @@ class Image(Semantic):
     def _voc(self):
 
         annotations = []
-        for _, annotation in self.annotations.items():
+        for annotation in self.iter_annotations():
             annotations.append(annotation._voc())
         
         element = E('annotation',
