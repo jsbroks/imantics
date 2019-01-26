@@ -43,8 +43,11 @@ class Dataset(Semantic):
                 image = dataset.images[image_id]
                 category = index_categories[category_id]
                 segmentation = annotation.get('segmentation')
+                color = annotation.get('color')
+                metadata = annotation.get('metadata', {})
 
-                annotation = Annotation(image, category, polygons=segmentation)
+                annotation = Annotation(image, category, polygons=segmentation,\
+                                        color=color, metadata=metadata)
                 dataset.add(annotation)
             
             return dataset

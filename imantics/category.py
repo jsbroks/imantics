@@ -10,7 +10,8 @@ class Category(Semantic):
             'name': coco.get('name'),
             'metadata': coco.get('metadata', {}),
             'id': coco.get('id', 0),
-            'parent': coco.get('supercategory')
+            'parent': coco.get('supercategory'),
+            'color': coco.get('color')
         }
         return cls(**data)
 
