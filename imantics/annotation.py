@@ -84,12 +84,20 @@ class Annotation(Semantic):
         """
         return cls(image, category, polygons=polygons)
 
-    def __init__(self, image, category, bbox=None, mask=None, polygons=None, id=0, color=None, metadata={}):
+    def __init__(self, image, category, bbox=None, mask=None, polygons=None, id=0,\
+                 color=None, metadata={}, width=0, height=0):
         
         assert isinstance(id, int), "id must be an integer"
         assert bbox or mask or polygons, "you must provide a mask, bbox or polygon"
 
         self.image = image
+        self.width = width
+        self.height = height
+
+        if image is not None:
+            self.width = image.width
+            self.height = image.height
+        
         self.category = category
         self.color = Color.create(color)
         
@@ -101,6 +109,14 @@ class Annotation(Semantic):
         self._init_with_mask = self._c_mask is not None
         self._init_with_polygons = self._c_polygons is not None
 
+        if (self.width + self.height) <= 0:
+            
+            if self._init_with_bbox:
+                self.width, self.height = self._c_bbox.max_point
+
+            if self._init_with_mask:
+                self.height, self.width = self._c_mask.array.shape
+
         super().__init__(id, metadata)
 
     @property
@@ -109,10 +125,14 @@ class Annotation(Semantic):
         :class:`Mask` repsentation of the annotations
         """
         if not self._c_mask:
+            
+            width = self.image.width
+            height = self.image.height
+
             if self._init_with_polygons:
-                self._c_mask = self.polygons.mask(width=self.image.width, height=self.image.height)
+                self._c_mask = self.polygons.mask(width=self.width, height=self.height)
             else:
-                self._c_mask = self.bbox.mask(width=self.image.width, height=self.image.height)
+                self._c_mask = self.bbox.mask(width=self.width, height=self.height)
         
         return self._c_mask
 
@@ -185,13 +205,25 @@ class Annotation(Semantic):
             else:
                 # Index category
                 category_index[category_name] = self.category
+    
+    def set_image(self, image):
+        self.image = image
 
+        if image is None:
+            return
+        
+        self.width = self.image.width
+        self.height = self.image.height
+
+        # Mask needs to be re-generated
+        self._c_mask = None
+    
     @property
     def size(self):
         """
         Tuple of width and height
         """
-        return self.image.size
+        return (self.width, self.height)
     
     def truncated(self):
         return len(self.polygons.segmentation) > 1
@@ -214,12 +246,15 @@ class Annotation(Semantic):
         :returns: COCO format of annotation
         :rtype: dict
         """
+        image_id = self.image.id if self.image else None
+        category_id = self.category.id if self.category else None
+
         annotation = {
             'id': self.id,
-            'image_id': self.image.id,
-            'category_id': self.category.id,
-            'width': self.image.width,
-            'height': self.image.height,
+            'image_id': image_id,
+            'category_id': category_id,
+            'width': self.width,
+            'height': self.height,
             'area': int(self.area),
             'segmentation': self.polygons.segmentation,
             'bbox': self.bbox.bbox(style=BBox.WIDTH_HEIGHT),
@@ -227,9 +262,16 @@ class Annotation(Semantic):
         }
 
         if include:
+            image = category = {}
+            if self.image:
+                image = self.image._coco(include=False)
+            
+            if self.category:
+                category = self.category._coco()
+
             return {
-                'categories': [self.category._coco()],
-                'images': [self.image._coco(include=False)],
+                'categories': [category],
+                'images': [image],
                 'annotations': [annotation]
             }
 

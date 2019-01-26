@@ -114,17 +114,18 @@ class Image(Semantic):
 
             height, width = annotation.array.shape[:2]
             if width == self.width and height == self.height:
-                annotation = Annotation.from_mask(self, category, annotation)
+                annotation = Annotation.from_mask(None, category, annotation)
             else:
                 raise ValueError('Cannot add annotaiton of size {} to image of size {}'\
                                  .format(annotation.array.shape, (self.height, self.width)))
             
         if isinstance(annotation, BBox):
-            annotation = Annotation.from_bbox(self, category, annotation)
+            annotation = Annotation.from_bbox(None, category, annotation)
 
         if isinstance(annotation, Polygons):
-            annotation = Annotation.from_polygons(self, category, annotation)
+            annotation = Annotation.from_polygons(None, category, annotation)
         
+        annotation.set_image(self)
         annotation.index(self)
 
     def index(self, dataset):
@@ -165,7 +166,7 @@ class Image(Semantic):
     def iter_categories(self):
         for key, category in self.categories.items():
             yield category
-
+        
     def _coco(self, include=True):
         image = {
             'id': self.id,
