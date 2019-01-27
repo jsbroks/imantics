@@ -8,18 +8,45 @@ class Semantic:
         self.metadata = metadata
     
     def coco(self):
+        """
+        Export object in COCO format
+        
+        :returns: object in format
+        :rtype: dict
+        """
         return {}
     
     def vgg(self):
+        """
+        Export object in VGG format
+        """
         return []
     
     def voc(self):
+        """
+        Export object in VOC format
+
+        :returns: object in format
+        :rtype: lxml.element
+        """
         return None
     
     def yolo(self):
+        """
+        Export object in YOLO format
+
+        :returns: object in format
+        :rtype: list, tuple
+        """
         return []
     
     def paperjs(self):
+        """
+        Export object in PaperJS format
+
+        :returns: object in format
+        :rtype: dict
+        """
         return {}
     
     def export(self, style=COCO):
