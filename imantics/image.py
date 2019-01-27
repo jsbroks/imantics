@@ -67,6 +67,9 @@ class Image(Semantic):
 
     @classmethod
     def empty(cls, width=0, height=0):
+        """
+        Creates an empty :class:`Image`
+        """
         return cls(width=width, height=height)
 
     annotations = {}
@@ -138,7 +141,20 @@ class Image(Semantic):
 
     def draw(self, bbox=True, outline=True, mask=True, thickness=3, \
              alpha=0.5, categories=None, color_by_category=False):
-
+        """
+        Draws annotations on top of the image. If no image is loaded, annotations will be applied
+        to a black image array.
+        
+        :param bbox: Draw bboxes
+        :param outline: Draw mask outlines
+        :param mask: Draw masks
+        :param alpha: opacity of masks (only applies to masks)
+        :param thickness: pixel width of lines for outline and bbox
+        :param color_by_category: Use the annotations's category to us as color
+        :param categories: List of categories to show
+        :returns: Image array with annotations
+        :rtype: numpy.ndarray
+        """
         temp_image = self.array.copy()
         temp_image.setflags(write=True)
 
@@ -159,11 +175,17 @@ class Image(Semantic):
         return temp_image       
 
     def iter_annotations(self):
+        """
+        Generator to iterate over all annotations
+        """
         for key, annotation in self.annotations.items():
             if isinstance(key, int):
                 yield annotation
 
     def iter_categories(self):
+        """
+        Generator to iterate over all categories
+        """
         for key, category in self.categories.items():
             yield category
         

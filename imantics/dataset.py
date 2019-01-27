@@ -94,15 +94,24 @@ class Dataset(Semantic):
         image.index(self)
     
     def iter_images(self):
+        """
+        Generator to iterate over all images
+        """
         for _, image in self.images.items():
             yield image
 
     def iter_annotations(self):
+        """
+        Generator to iterate over all annotations
+        """
         for key, annotation in self.annotations.items():
             if isinstance(key, int):
                 yield annotation
 
     def iter_categories(self):
+        """
+        Generator to iterate over all categories
+        """
         for _, category in self.categories.items():
             yield category
 
@@ -142,7 +151,12 @@ class Dataset(Semantic):
         return coco
     
     def _yolo(self):
-        pass
+        yolo = {}
+
+        for image in self.iter_images():
+            yolo[image.path] = image._yolo()
+        
+        return yolo
 
 
 __all__ = ["Dataset"]

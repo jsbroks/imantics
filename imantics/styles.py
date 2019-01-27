@@ -1,16 +1,16 @@
 
 
-#: COCO Style value
+#: COCO Style value (http://cocodataset.org/#format-data)
 COCO = "coco"
 
-#: COCO Style value
+#: PaperJs Style value (http://paperjs.org/reference/compoundpath/)
 PAPERJS = "paperjs"
 
-#: COCO Style value
+#: VGG Style value ()
 VGG = "vgg"
 
-#: COCO Style value
+#: VOC Style value
 VOC = "voc"
 
-#: YOLO Style value
+#: YOLO Style value (https://github.com/AlexeyAB/darknet#how-to-train-to-detect-your-custom-objects)
 YOLO = "yolo"

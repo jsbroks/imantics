@@ -207,6 +207,11 @@ class Annotation(Semantic):
                 category_index[category_name] = self.category
     
     def set_image(self, image):
+        """
+        Sets the annotaiton image information
+
+        :type image: :class:`Image`
+        """
         self.image = image
 
         if image is None:
@@ -678,7 +683,17 @@ class Polygons:
 
         return self._c_segmentation
 
-    def draw(self, image, color=None, thickness=3): 
+    def draw(self, image, color=None, thickness=3):
+        """
+        Draws the polygons to the image array of shape (width, height, 3)
+        
+        *This function modifies the image array*
+
+        :param color: RGB color repersentation
+        :type color: tuple, list
+        :param thickness: pixel thickness of box
+        :type thinkness: int
+        """
         color = Color.create(color).rgb
         cv2.polylines(image, self.points, True, color, thickness)
 
