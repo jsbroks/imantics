@@ -5,8 +5,9 @@
 ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)
 [![Build Status](https://travis-ci.org/jsbroks/imantics.svg?branch=master)](https://travis-ci.org/jsbroks/imantics)
 [![Documentation Status](https://readthedocs.org/projects/imantics/badge/?version=latest)](https://imantics.readthedocs.io/en/latest/?badge=latest)
-![Python Versions](https://img.shields.io/pypi/pyversions/3.svg)
-![PyPi](https://img.shields.io/pypi/v/imantics.svg)
+![Python V](https://img.shields.io/pypi/pyversions/imantics.svg)
+[![PyPi](https://img.shields.io/pypi/v/imantics.svg)](https://pypi.org/project/imantics/)
+[![PyPi Downloads](https://img.shields.io/pypi/dm/imantics.svg)](https://pypi.org/project/imantics/)
 
 > Currently a work in progress!
 

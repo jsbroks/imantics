@@ -15,5 +15,6 @@ setup(
     license='MIT',
     install_requires=['numpy', 'opencv-python>=3', 'lxml'],
     packages=['imantics'],
+    python_requires='>=3',
     zip_safe=False
 )
