@@ -23,13 +23,14 @@ class Category(Semantic):
 
         super().__init__(id, metadata)
 
-    def _coco(self, include=True):
+    def coco(self, include=True):
 
         category = {
             'id': self.id,
             'name': self.name,
             'supercategory': self.parent.name if self.parent else None,
-            'metadata': self.metadata
+            'metadata': self.metadata,
+            'color': self.color.hex
         }
 
         if include:

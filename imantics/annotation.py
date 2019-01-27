@@ -241,7 +241,7 @@ class Annotation(Semantic):
     def __contains__(self, item):
         return self.contains(item)
 
-    def _coco(self, include=True):
+    def coco(self, include=True):
         """
         Generates COCO format of annotation
 
@@ -263,16 +263,17 @@ class Annotation(Semantic):
             'area': int(self.area),
             'segmentation': self.polygons.segmentation,
             'bbox': self.bbox.bbox(style=BBox.WIDTH_HEIGHT),
-            'metadata': self.metadata
+            'metadata': self.metadata,
+            'color': self.color.hex
         }
 
         if include:
             image = category = {}
             if self.image:
-                image = self.image._coco(include=False)
+                image = self.image.coco(include=False)
             
             if self.category:
-                category = self.category._coco()
+                category = self.category.coco()
 
             return {
                 'categories': [category],
@@ -282,7 +283,7 @@ class Annotation(Semantic):
 
         return annotation
 
-    def _yolo(self):
+    def yolo(self):
         
         height = self.bbox.height / self.image.height
         width = self.bbox.width / self.image.width
@@ -292,7 +293,7 @@ class Annotation(Semantic):
 
         return "{} {:.5f} {:.5f} {:.5f} {:.5f}".format(label, x, y, width, height)
     
-    def _voc(self):
+    def voc(self):
 
         element = E('object',
             E('name', self.category.name),

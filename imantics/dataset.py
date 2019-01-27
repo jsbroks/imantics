@@ -140,21 +140,21 @@ class Dataset(Semantic):
 
         print(percents)
 
-    def _coco(self):
+    def coco(self):
         coco = {
             'info': {},
-            'categories': [c._coco() for c in self.iter_categories()],
-            'images': [i._coco(include=False) for i in self.iter_images()],
-            'annotations': [a._coco(include=False) for a in self.iter_annotations()]
+            'categories': [c.coco(include=False) for c in self.iter_categories()],
+            'images': [i.coco(include=False) for i in self.iter_images()],
+            'annotations': [a.coco(include=False) for a in self.iter_annotations()]
         }
         
         return coco
     
-    def _yolo(self):
+    def yolo(self):
         yolo = {}
 
         for image in self.iter_images():
-            yolo[image.path] = image._yolo()
+            yolo[image.path] = image.yolo()
         
         return yolo
 

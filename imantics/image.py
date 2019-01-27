@@ -189,7 +189,7 @@ class Image(Semantic):
         for key, category in self.categories.items():
             yield category
         
-    def _coco(self, include=True):
+    def coco(self, include=True):
         image = {
             'id': self.id,
             'width': self.width,
@@ -208,12 +208,12 @@ class Image(Semantic):
             categories = []
             for category in self.iter_categories():
                 category.id = len(categories) + 1
-                categories.append(category._coco(include=False))
+                categories.append(category.coco(include=False))
 
             annotations = []
             for annotation in self.iter_annotations():
                 annotation.id = len(annotations) + 1
-                annotations.append(annotation._coco(include=False))
+                annotations.append(annotation.coco(include=False))
 
             return {
                 'categories': categories,
@@ -223,7 +223,7 @@ class Image(Semantic):
 
         return image
     
-    def _yolo(self):
+    def yolo(self):
         yolo = []
         
         categories = []
@@ -232,15 +232,15 @@ class Image(Semantic):
             categories.append(category)
         
         for annotation in self.iter_annotations():
-            yolo.append(annotation._yolo())
+            yolo.append(annotation.yolo())
         
         return yolo
 
-    def _voc(self):
+    def voc(self, pretty=False):
 
         annotations = []
         for annotation in self.iter_annotations():
-            annotations.append(annotation._voc())
+            annotations.append(annotation.voc())
         
         element = E('annotation',
             E('folder', self.path[: -1*(len(self.file_name)+1)]),
@@ -253,6 +253,9 @@ class Image(Semantic):
             ),
             *annotations
         )
+        
+        if pretty:
+            return ET.tostring(element, pretty_print=True).decode('utf-8')
         
         return element
 

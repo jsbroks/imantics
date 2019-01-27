@@ -7,19 +7,19 @@ class Semantic:
         self.id = id
         self.metadata = metadata
     
-    def _coco(self):
+    def coco(self):
         return {}
     
-    def _vgg(self):
+    def vgg(self):
         return []
     
-    def _voc(self):
+    def voc(self):
         return None
     
-    def _yolo(self):
+    def yolo(self):
         return []
     
-    def _paperjs(self):
+    def paperjs(self):
         return {}
     
     def export(self, style=COCO):
@@ -27,11 +27,11 @@ class Semantic:
         Exports object into specified style
         """
         return {
-            COCO: self._coco(),
-            VGG: self._vgg(),
-            YOLO: self._yolo(),
-            VOC: self._voc(),
-            PAPERJS: self._paperjs()
+            COCO: self.coco(),
+            VGG: self.vgg(),
+            YOLO: self.yolo(),
+            VOC: self.voc(),
+            PAPERJS: self.paperjs()
         }.get(style)
     
     def save(self, file):
