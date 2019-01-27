@@ -18,7 +18,7 @@ class Annotation(Semantic):
     """
 
     @classmethod
-    def from_mask(cls, image, category, mask):
+    def from_mask(cls, mask, image=None, category=None):
         """
         Creates annotation class from a mask
 
@@ -29,10 +29,10 @@ class Annotation(Semantic):
         :param mask: mask to create annotation from
         :type mask: :class:`Mask`, numpy.ndarray, list
         """
-        return cls(image, category, mask=mask)
+        return cls(image=image, category=category, mask=mask)
     
     @classmethod
-    def from_bbox(cls, image, category, bbox):
+    def from_bbox(cls, bbox, image=None, category=None):
         """
         Creates annotation from bounding box
 
@@ -43,10 +43,10 @@ class Annotation(Semantic):
         :param polygons: bbox to create annotation from
         :type polygons: :class:`BBox`, list, tuple
         """
-        return cls(image, category, bbox=bbox)
+        return cls(image=image, category=image, bbox=bbox)
     
     @classmethod
-    def from_polygons(cls, image, category, polygons):
+    def from_polygons(cls, polygons, image=None, category=None):
         """
         Creates annotation from polygons
 
@@ -82,9 +82,9 @@ class Annotation(Semantic):
         :param polygons: polygons to create annotation from
         :type polygons: :class:`Polygons`, list
         """
-        return cls(image, category, polygons=polygons)
+        return cls(image=image, category=category, polygons=polygons)
 
-    def __init__(self, image, category, bbox=None, mask=None, polygons=None, id=0,\
+    def __init__(self, image=None, category=None, bbox=None, mask=None, polygons=None, id=0,\
                  color=None, metadata={}, width=0, height=0):
         
         assert isinstance(id, int), "id must be an integer"

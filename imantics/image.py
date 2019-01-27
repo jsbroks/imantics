@@ -32,7 +32,7 @@ class Image(Semantic):
     def from_path(cls, path):
         """
         Returns an array of images if path is a directory
-        Returns an image if path is a file
+        Returns an :class:`Image` if path is a file
         """
         if os.path.isdir(path):
             return Image.from_folder(path)
