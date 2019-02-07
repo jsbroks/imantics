@@ -283,15 +283,25 @@ class Annotation(Semantic):
 
         return annotation
 
-    def yolo(self):
-        
+    def yolo(self, as_string=True):
+        """
+        Generates YOLO format of annotation (using the bounding box)
+
+        :param as_string: return string (true) or tuple (false) representation
+        :type as_string: bool
+        :returns: YOLO repersentation of annotation
+        :rtype: str, tuple
+        """
         height = self.bbox.height / self.image.height
         width = self.bbox.width / self.image.width
         x = self.bbox._xmin / self.image.width
         y = self.bbox._ymin / self.image.height
         label = self.category.id
 
-        return "{} {:.5f} {:.5f} {:.5f} {:.5f}".format(label, x, y, width, height)
+        if as_string:
+            return "{} {:.5f} {:.5f} {:.5f} {:.5f}".format(label, x, y, width, height)
+        else:
+            return label, x, y, width, height
     
     def voc(self):
 

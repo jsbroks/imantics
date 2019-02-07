@@ -19,6 +19,11 @@ class Image(Semantic):
 
     @classmethod
     def from_folder(cls, directory):
+        """
+        Creates :class:`Image`'s from all images found in directory
+
+        :returns: list of :class:`Image`'s
+        """
         images = []
         for path, _, files in os.walk(directory):
             for name in files:
@@ -44,7 +49,13 @@ class Image(Semantic):
 
     @classmethod
     def from_coco(cls, coco, dataset=None):
+        """
+        Creates an :class:`Image` from a dict in COCO formatted image
 
+        :param coco: COCO formatted image
+        :type coco: dict
+        :rtype: :class:`Image`
+        """
         metadata = coco.get('metadata', {})
 
         metadata.update({
@@ -87,6 +98,11 @@ class Image(Semantic):
             annotation.index(self)
 
         self.path = path
+        # Load image form path if path is provided and image_array is not
+        if len(path) != 0 and image_array is None:
+            self = Image.from_path(path)
+        
+        # Create empty image if not provided
         if image_array is None:
             self.array = np.zeros((height, width, 3)).astype(np.uint8)
         else:

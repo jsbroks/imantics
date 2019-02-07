@@ -43,8 +43,10 @@ class Dataset(Semantic):
                 image = dataset.images[image_id]
                 category = index_categories[category_id]
                 segmentation = annotation.get('segmentation')
-                color = annotation.get('color')
                 metadata = annotation.get('metadata', {})
+                
+                # color can be stored in the metadata
+                color = annotation.get('color', metadata.get('color'))
 
                 annotation = Annotation(image, category, polygons=segmentation,\
                                         color=color, metadata=metadata)
@@ -55,6 +57,8 @@ class Dataset(Semantic):
         from pycocotools.coco import COCO
         if isinstance(coco_obj, COCO):
             pass
+        
+        return None
     
     annotations = {}
     categories = {}
