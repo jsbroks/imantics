@@ -338,7 +338,7 @@ class BBox:
         :type mask: :class:`Mask`, numpy.ndarray, list
         :returns: :class:`BBox` repersentation
         """
-        return mask.bbox()
+        return Mask.create(mask).bbox()
     
     @classmethod
     def from_polygons(cls, polygons):
@@ -349,17 +349,17 @@ class BBox:
         :type polygons: :class:`Polygons`, list
         :returns: :class:`BBox` repersentation
         """
-        return polygons.bbox()
+        return Polygons.create(polygons).bbox()
     
     @classmethod
-    def create(cls, bbox):
+    def create(cls, bbox, style=None):
         """
         Creates :class:`BBox`
 
         Recommend over the use of ``__init__``.
         """
         if isinstance(bbox, BBox.INSTANCE_TYPES):
-            return BBox(bbox)
+            return BBox(bbox, style=style)
         
         if isinstance(bbox, BBox):
             return bbox
@@ -564,7 +564,7 @@ class Polygons:
         :type mask: :class:`Mask`, numpy.ndarray, list
         :returns: :class:`Polygons` repersentation
         """
-        return mask.polygons()
+        return Mask.create(mask).polygons()
 
     @classmethod
     def from_bbox(cls, bbox, style=None):
@@ -575,7 +575,7 @@ class Polygons:
         :type bbox: :class:`BBox`, list, tuple
         :returns: :class:`Polygons` repersentation
         """
-        return bbox.polygons()
+        return BBox.create(bbox).polygons()
         
     @classmethod
     def create(cls, polygons):
@@ -726,11 +726,11 @@ class Mask:
 
     @classmethod
     def from_polygons(cls, polygons):
-        return polygons.mask()
+        return Polygons.create(polygons).mask()
     
     @classmethod
     def from_bbox(cls, bbox):
-        return bbox.mask()
+        return BBox.create(bbox).mask()
             
     @classmethod
     def create(cls, mask):
