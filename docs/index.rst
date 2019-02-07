@@ -12,9 +12,15 @@ and localization.
 
 .. code-block:: console
 
+    $ pip install imantics
+
+or use the latest build with
+
+.. code-block:: console
+
     $ git clone https://github.com/jsbroks/imantics/
     $ cd /imantics
-    $ pip install .
+    $ pip install imantics
 
 
 :doc:`tutorial`
