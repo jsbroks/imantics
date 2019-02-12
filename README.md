@@ -19,6 +19,8 @@ Currently Support Formats:
 
 - COCO Format
 - Binary Masks
+- YOLO
+- VOC
 
 ## Installing
 
