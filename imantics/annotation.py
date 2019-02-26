@@ -117,7 +117,7 @@ class Annotation(Semantic):
             if self._init_with_mask:
                 self.height, self.width = self._c_mask.array.shape
 
-        super().__init__(id, metadata)
+        super(Annotation, self).__init__(id, metadata)
 
     @property
     def mask(self):

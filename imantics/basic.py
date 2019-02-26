@@ -1,7 +1,7 @@
 from .styles import *
 
 
-class Semantic:
+class Semantic(object):
 
     def __init__(self, id, metadata={}):
         self.id = id

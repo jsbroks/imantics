@@ -21,7 +21,7 @@ class Category(Semantic):
         self.parent = None
         self.color = Color.create(color)
 
-        super().__init__(id, metadata)
+        super(Category, self).__init__(id, metadata)
 
     def coco(self, include=True):
 
