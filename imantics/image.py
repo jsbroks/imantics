@@ -156,7 +156,7 @@ class Image(Semantic):
             annotation.index(dataset)
 
     def draw(self, bbox=True, outline=True, mask=True, thickness=3, \
-             alpha=0.5, categories=None, color_by_category=False):
+             alpha=0.5, categories=None, text_scale = 0.5, color_by_category=False):
         """
         Draws annotations on top of the image. If no image is loaded, annotations will be applied
         to a black image array.
@@ -189,9 +189,9 @@ class Image(Semantic):
                     annotation.bbox.draw(temp_image, thickness=thickness, color=color)
 
 		cv2.putText(temp_image, category.name, annotation.bbox.top_left, 
-		            cv2.FONT_HERSHEY_PLAIN, 0.5, (0,0,0), 2, cv2.LINE_AA)
+		            cv2.FONT_HERSHEY_PLAIN, text_scale, (0,0,0), 2, cv2.LINE_AA)
 		cv2.putText(temp_image, category.name, annotation.bbox.top_left, 
-		            cv2.FONT_HERSHEY_PLAIN, 0.5, (255,255,255), 1, cv2.LINE_AA)
+		            cv2.FONT_HERSHEY_PLAIN, text_scale, (255,255,255), 1, cv2.LINE_AA)
 
         return temp_image       
 
