@@ -188,6 +188,11 @@ class Image(Semantic):
                 if bbox:
                     annotation.bbox.draw(temp_image, thickness=thickness, color=color)
 
+		cv2.putText(temp_image, category.name, annotation.bbox.top_left, 
+		            cv2.FONT_HERSHEY_PLAIN, 0.5, (0,0,0), 2, cv2.LINE_AA)
+		cv2.putText(temp_image, category.name, annotation.bbox.top_left, 
+		            cv2.FONT_HERSHEY_PLAIN, 0.5, (255,255,255), 1, cv2.LINE_AA)
+
         return temp_image       
 
     def iter_annotations(self):
