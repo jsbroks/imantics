@@ -189,7 +189,7 @@ class Annotation(Semantic):
         found = annotation_index.get(self.id)
         if found:
             # Increment index until not found
-            annotation_index.id += 1
+            self.id += 1
             self.index(image)
         else:
             annotation_index[self.id] = self
