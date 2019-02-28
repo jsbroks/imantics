@@ -113,7 +113,7 @@ class Image(Semantic):
         self.size = (self.width, self.height)
         self.file_name = os.path.basename(self.path)
 
-        super().__init__(id, metadata)
+        super(Image, self).__init__(id, metadata)
 
     def add(self, annotation, category=None):
         """

@@ -3,8 +3,8 @@ import subprocess
 
 
 def get_tag():
-    result = subprocess.run(["git", "describe", "--abbrev=0", "--tags"], stdout=subprocess.PIPE)
-    return str(result.stdout.decode("utf-8")).strip()[1:]
+    result = subprocess.check_output(["git", "describe", "--abbrev=0", "--tags"])
+    return str(result.strip()[1:])
 
 
 with open("README.md", "r") as fh:
@@ -23,6 +23,6 @@ setup(
     license='MIT',
     install_requires=['numpy', 'opencv-python>=3', 'lxml'],
     packages=['imantics'],
-    python_requires='>=3',
+    python_requires='>=2.7',
     zip_safe=False
 )

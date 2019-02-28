@@ -70,7 +70,7 @@ class Dataset(Semantic):
         for image in images:
             image.index(self)
         
-        super().__init__(id, metadata)
+        super(Dataset, self).__init__(id, metadata)
     
     def add(self, image):
         """
