@@ -502,7 +502,7 @@ class BBox:
             [ ]------[ ]
         
         """
-        return self._xmin, self._ymax
+        return self._xmin, self._ymin
         
     @property
     def bottom_right(self):
