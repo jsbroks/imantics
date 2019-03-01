@@ -189,7 +189,7 @@ class Annotation(Semantic):
         found = annotation_index.get(self.id)
         if found:
             # Increment index until not found
-            annotation_index.id += 1
+            self.id += 1
             self.index(image)
         else:
             annotation_index[self.id] = self
@@ -264,7 +264,8 @@ class Annotation(Semantic):
             'segmentation': self.polygons.segmentation,
             'bbox': self.bbox.bbox(style=BBox.WIDTH_HEIGHT),
             'metadata': self.metadata,
-            'color': self.color.hex
+            'color': self.color.hex,
+            'iscrowd': 0
         }
 
         if include:
