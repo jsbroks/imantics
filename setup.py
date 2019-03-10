@@ -4,7 +4,7 @@ import subprocess
 
 def get_tag():
     result = subprocess.check_output(["git", "describe", "--abbrev=0", "--tags"])
-    return str(result.strip()[1:])
+    return str(result.decode("utf-8").strip()[1:])
 
 
 with open("README.md", "r") as fh:
