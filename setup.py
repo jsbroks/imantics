@@ -1,10 +1,4 @@
 from setuptools import setup
-import subprocess
-
-
-def get_tag():
-    result = subprocess.check_output(["git", "describe", "--abbrev=0", "--tags"])
-    return str(result.decode("utf-8").strip()[1:])
 
 
 with open("README.md", "r") as fh:
@@ -12,7 +6,7 @@ with open("README.md", "r") as fh:
 
 
 setup(
-    name='imantics',
+    name='0.1.7',
     version=get_tag(),
     description='Python package for managing image annotations',
     url='https://github.com/jsbroks/imantics',
