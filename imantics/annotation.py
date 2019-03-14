@@ -100,7 +100,6 @@ class Annotation(Semantic):
         
         self.category = category
         self.color = Color.create(color)
-        print(Mask.create(mask))
         self._c_bbox = BBox.create(bbox)
         self._c_mask = Mask.create(mask)
         self._c_polygons = Polygons.create(polygons)
