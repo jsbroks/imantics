@@ -100,7 +100,7 @@ class Annotation(Semantic):
         
         self.category = category
         self.color = Color.create(color)
-        
+        print(Mask.create(mask))
         self._c_bbox = BBox.create(bbox)
         self._c_mask = Mask.create(mask)
         self._c_polygons = Polygons.create(polygons)
@@ -176,7 +176,7 @@ class Annotation(Semantic):
         """
         if self._init_with_mask or self._init_with_polygons:
             return self.mask.area()
-        return self.bbox.area
+        return self.bbox.area()
 
     def index(self, image):
         
@@ -221,7 +221,7 @@ class Annotation(Semantic):
         self.height = self.image.height
 
         # Mask needs to be re-generated
-        self._c_mask = None
+        # self._c_mask = None
     
     @property
     def size(self):
@@ -408,7 +408,8 @@ class BBox:
             self._xmax = self._xmin + self.width
             self._ymax = self._ymin + self.height
         
-        self.area = self.width * self.height
+    def area(self):
+        return self.width * self.height
 
     def bbox(self, style=None):
         """
