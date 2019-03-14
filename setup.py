@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='imantics',
-    version='0.1.7',
+    version='0.1.8',
     description='Python package for managing image annotations',
     url='https://github.com/jsbroks/imantics',
     author='Justin Brooks',
