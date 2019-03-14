@@ -59,7 +59,7 @@ class TestBBoxMeasurements:
     def test_area(self, bbox, style, e_area):
         sut = BBox(bbox, style=style)
 
-        assert sut.area == e_area
+        assert sut.area() == e_area
 
     def test_segmentation(self):
         pass
