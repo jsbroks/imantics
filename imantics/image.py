@@ -133,16 +133,16 @@ class Image(Semantic):
 
             height, width = annotation.array.shape[:2]
             if width == self.width and height == self.height:
-                annotation = Annotation.from_mask(annotation, category, annotation)
+                annotation = Annotation.from_mask(annotation, image=self, category=category)
             else:
                 raise ValueError('Cannot add annotaiton of size {} to image of size {}'\
                                  .format(annotation.array.shape, (self.height, self.width)))
             
         if isinstance(annotation, BBox):
-            annotation = Annotation.from_bbox(annotation, category, annotation)
+            annotation = Annotation.from_bbox(annotation, image=self, category=category)
 
         if isinstance(annotation, Polygons):
-            annotation = Annotation.from_polygons(annotation, category, annotation)
+            annotation = Annotation.from_polygons(annotation, image=self, category=category)
         
         annotation.set_image(self)
         annotation.index(self)
