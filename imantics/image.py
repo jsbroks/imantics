@@ -68,8 +68,8 @@ class Image(Semantic):
 
         data = {
             'id': coco.get('id', 0),
-            'width': coco.get('height', 0),
-            'height': coco.get('width', 0),
+            'width': coco.get('width', 0),
+            'height': coco.get('height', 0),
             'path': coco.get('path', coco.get('file_name', '')),
             'metadata': metadata,
             'dataset': dataset
@@ -174,7 +174,6 @@ class Image(Semantic):
         """
         temp_image = self.array.copy()
         temp_image.setflags(write=True)
-        print(temp_image.shape)
 
         for annotation in self.iter_annotations():
             category = annotation.category
