@@ -65,10 +65,11 @@ class Image(Semantic):
             'date_captured': coco.get('date_captured')
         })
 
+
         data = {
             'id': coco.get('id', 0),
-            'width': coco.get('width', 0),
-            'height': coco.get('height', 0),
+            'width': coco.get('height', 0),
+            'height': coco.get('width', 0),
             'path': coco.get('path', coco.get('file_name', '')),
             'metadata': metadata,
             'dataset': dataset
@@ -99,8 +100,8 @@ class Image(Semantic):
 
         self.path = path
         # Load image form path if path is provided and image_array is not
-        if len(path) != 0 and image_array is None:
-            self = Image.from_path(path)
+        #if len(path) != 0 and image_array is None:
+            # self = Image.from_path(path)
         
         # Create empty image if not provided
         if image_array is None:
@@ -173,6 +174,7 @@ class Image(Semantic):
         """
         temp_image = self.array.copy()
         temp_image.setflags(write=True)
+        print(temp_image.shape)
 
         for annotation in self.iter_annotations():
             category = annotation.category

@@ -43,7 +43,7 @@ class Annotation(Semantic):
         :param polygons: bbox to create annotation from
         :type polygons: :class:`BBox`, list, tuple
         """
-        return cls(image=image, category=image, bbox=bbox)
+        return cls(image=image, category=category, bbox=bbox)
     
     @classmethod
     def from_polygons(cls, polygons, image=None, category=None):
