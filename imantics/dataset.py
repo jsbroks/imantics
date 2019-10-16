@@ -7,6 +7,52 @@ from .image import Image
 
 
 class Dataset(Semantic):
+    @classmethod
+    def from_xml(cls, xml_folder, name="XML Dataset"):
+
+        from xmljson import badgerfish as bf
+        from xml.etree.ElementTree import fromstring
+        """
+        Generates a dataset from a folder with XML and corresponding images
+
+        :param xml_folder: 
+        :type xml_folder: pathlib.Path
+        :raise ImportError: Raised if xml_folder is a `pathlib.Path`
+                            object and it cannot be imported
+        """
+        dataset = cls(name)
+        xml_list = list(xml_folder.glob("*.jpg"))
+        categories = []
+        for idx, imgp in enumerate(xml_list):
+            xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
+            for ann in xml["annotation"]["object"]:
+                cat = ann["name"]["$"]
+                categories.append(cat)
+        categories = list(set(categories))
+        xml_categories = {cat: Category(cat,id=idx) for idx,cat in enumerate(categories)}
+
+        for idx, imgp in enumerate(xml_list):
+            image = Image.from_path(str(imgp))
+            image.id = idx
+            image.dataset = name
+            
+            
+            xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
+
+            for ann in xml["annotation"]["object"]:
+                i = ann["bndbox"]
+                cat = ann["name"]["$"]
+
+                x,y,xx,yy = (int(i["xmin"]["$"]), int(i["ymin"]["$"]),int(i["xmax"]["$"]),int(i["ymax"]["$"]))
+                bbox = [x,y,xx,yy]
+
+                fin_ann = Annotation(image=image, bbox=bbox,category=xml_categories[cat])
+                image.add(fin_ann)
+
+            
+            dataset.add(image)
+        return dataset
+    
     
     @classmethod
     def from_coco(cls, coco_obj, name="COCO Datset"):

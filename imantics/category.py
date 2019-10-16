@@ -4,6 +4,7 @@ from .color import Color
 
 class Category(Semantic):
 
+
     @classmethod
     def from_coco(cls, coco):
         data = {
@@ -14,6 +15,7 @@ class Category(Semantic):
             'color': coco.get('color')
         }
         return cls(**data)
+
 
     def __init__(self, name, parent=None, metadata={}, id=0, color=None):
         self.id = id

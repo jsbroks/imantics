@@ -65,6 +65,7 @@ class Image(Semantic):
             'date_captured': coco.get('date_captured')
         })
 
+
         data = {
             'id': coco.get('id', 0),
             'width': coco.get('width', 0),
@@ -99,8 +100,8 @@ class Image(Semantic):
 
         self.path = path
         # Load image form path if path is provided and image_array is not
-        if len(path) != 0 and image_array is None:
-            self = Image.from_path(path)
+        #if len(path) != 0 and image_array is None:
+            # self = Image.from_path(path)
         
         # Create empty image if not provided
         if image_array is None:

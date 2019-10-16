@@ -16,15 +16,15 @@ class TestImageCreate:
         assert draw.shape == (height, width, 3)
     
     def test_image_from_path(self):
-        path = 'examples/data/tesla.jpg'
-        image = Image.from_path('examples/data/tesla.jpg')
+        path = 'examples/data/coco_example/tesla.jpg'
+        image = Image.from_path('examples/data/coco_example/tesla.jpg')
 
         assert image.path == path
         assert image.file_name == 'tesla.jpg'
         assert image.size == (900, 600)
 
     def test_images_from_folder(self):
-        path = 'examples/data'
+        path = 'examples/data/coco_example'
         images = Image.from_path(path)
         
         assert isinstance(images, list)
