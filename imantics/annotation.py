@@ -94,6 +94,7 @@ class Annotation(Semantic):
         self.width = width
         self.height = height
 
+
         if image is not None:
             self.width = image.width
             self.height = image.height
@@ -264,7 +265,9 @@ class Annotation(Semantic):
             'bbox': self.bbox.bbox(style=BBox.WIDTH_HEIGHT),
             'metadata': self.metadata,
             'color': self.color.hex,
-            'iscrowd': 0
+            'iscrowd': 0,
+            'isbbox': self._init_with_bbox
+
         }
 
         if include:
