@@ -94,6 +94,7 @@ class Annotation(Semantic):
         self.width = width
         self.height = height
 
+
         if image is not None:
             self.width = image.width
             self.height = image.height
@@ -101,6 +102,8 @@ class Annotation(Semantic):
         self.category = category
         self.color = Color.create(color)
         self._c_bbox = BBox.create(bbox)
+        self.isbbox = True if bbox else False
+
         self._c_mask = Mask.create(mask)
         self._c_polygons = Polygons.create(polygons)
 
@@ -264,7 +267,9 @@ class Annotation(Semantic):
             'bbox': self.bbox.bbox(style=BBox.WIDTH_HEIGHT),
             'metadata': self.metadata,
             'color': self.color.hex,
-            'iscrowd': 0
+            'iscrowd': 0,
+            'isbbox': self.isbbox
+
         }
 
         if include:
