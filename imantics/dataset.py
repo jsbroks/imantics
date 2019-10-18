@@ -26,8 +26,9 @@ class Dataset(Semantic):
         for idx, imgp in enumerate(xml_list):
             xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
 
-            if type(xml) != list:
-                xml = [xml]
+            # Handle single object case
+            if type(xml["annotation"]["object"]) != list:
+                xml["annotation"]["object"] = [xml["annotation"]["object"]]
 
             for ann in xml["annotation"]["object"]:
 
@@ -43,9 +44,11 @@ class Dataset(Semantic):
             
             
             xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
-            if type(xml) != list:
-                xml = [xml]
-
+            
+            # Handle single object case
+            if type(xml["annotation"]["object"]) != list:
+                xml["annotation"]["object"] = [xml["annotation"]["object"]]
+                
             for ann in xml["annotation"]["object"]:
                 i = ann["bndbox"]
                 cat = ann["name"]["$"]
