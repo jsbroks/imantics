@@ -35,8 +35,8 @@ class Dataset(Semantic):
                 cat = ann["name"]["$"]
                 categories.append(cat)
         categories = list(set(categories))
-        xml_categories = {cat: Category(cat,id=idx) for idx,cat in enumerate(categories)}
-        print(xml_categories)
+        print(categories)
+        xml_categories = {cat: Category(cat,id=idx+1) for idx,cat in enumerate(categories)}
 
         for idx, imgp in enumerate(xml_list):
             image = Image.from_path(str(imgp))
@@ -56,6 +56,7 @@ class Dataset(Semantic):
 
                 x,y,xx,yy = (int(i["xmin"]["$"]), int(i["ymin"]["$"]),int(i["xmax"]["$"]),int(i["ymax"]["$"]))
                 bbox = [x,y,xx,yy]
+                print(xml_categories[cat].id)
 
                 fin_ann = Annotation(image=image, bbox=bbox,category=xml_categories[cat])
                 image.add(fin_ann)
