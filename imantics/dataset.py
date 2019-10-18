@@ -36,6 +36,7 @@ class Dataset(Semantic):
                 categories.append(cat)
         categories = list(set(categories))
         xml_categories = {cat: Category(cat,id=idx) for idx,cat in enumerate(categories)}
+        print(xml_categories)
 
         for idx, imgp in enumerate(xml_list):
             image = Image.from_path(str(imgp))
@@ -44,7 +45,7 @@ class Dataset(Semantic):
             
             
             xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
-            
+
             # Handle single object case
             if type(xml["annotation"]["object"]) != list:
                 xml["annotation"]["object"] = [xml["annotation"]["object"]]
