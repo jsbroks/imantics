@@ -43,7 +43,7 @@ class Dataset(Semantic):
 
         xml_categories = {cat: Category(cat,id=idx+1) for idx,cat in enumerate(categories)}
 
-        for idx, imgp in enumerate(xml_list)):
+        for idx, imgp in enumerate(xml_list):
             image = Image.from_path(str(imgp))
             image.id = idx
             image.dataset = name
