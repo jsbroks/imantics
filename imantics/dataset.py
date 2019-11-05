@@ -4,7 +4,7 @@ from .annotation import Annotation
 from .category import Category
 from .basic import Semantic
 from .image import Image
-from tqdm import tqdm
+
 
 class Dataset(Semantic):
     @classmethod
@@ -43,7 +43,7 @@ class Dataset(Semantic):
 
         xml_categories = {cat: Category(cat,id=idx+1) for idx,cat in enumerate(categories)}
 
-        for idx, imgp in enumerate(tqdm(xml_list)):
+        for idx, imgp in enumerate(xml_list)):
             image = Image.from_path(str(imgp))
             image.id = idx
             image.dataset = name
@@ -55,7 +55,7 @@ class Dataset(Semantic):
             if type(xml["annotation"]["object"]) is not list:
                 xml["annotation"]["object"] = [xml["annotation"]["object"]]
                 
-            for ann in tqdm(xml["annotation"]["object"]):
+            for ann in xml["annotation"]["object"]:
                 i = ann["bndbox"]
                 cat = ann["name"]["$"]
 
