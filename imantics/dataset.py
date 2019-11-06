@@ -9,6 +9,7 @@ from .image import Image
 class Dataset(Semantic):
     @classmethod
     def from_xml(cls, xml_folder, name="XML Dataset"):
+        extensions = ("jpg","JPG","png")
 
         from xmljson import badgerfish as bf
         from xml.etree.ElementTree import fromstring
@@ -21,7 +22,11 @@ class Dataset(Semantic):
                             object and it cannot be imported
         """
         dataset = cls(name)
-        xml_list = list(xml_folder.glob("*.jpg"))
+        xml_list = []
+        id_counter = 0
+        
+        for ext in extensions:
+            xml_list += list(xml_folder.glob(f"*.{ext}"))
         categories = []
         for idx, imgp in enumerate(xml_list):
             xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
@@ -35,6 +40,7 @@ class Dataset(Semantic):
                 cat = ann["name"]["$"]
                 categories.append(cat)
         categories = list(set(categories))
+
         xml_categories = {cat: Category(cat,id=idx+1) for idx,cat in enumerate(categories)}
 
         for idx, imgp in enumerate(xml_list):
@@ -56,7 +62,9 @@ class Dataset(Semantic):
                 x,y,xx,yy = (int(i["xmin"]["$"]), int(i["ymin"]["$"]),int(i["xmax"]["$"]),int(i["ymax"]["$"]))
                 bbox = [x,y,xx,yy]
 
-                fin_ann = Annotation(image=image, bbox=bbox,category=xml_categories[cat])
+                fin_ann = Annotation(id=id_counter, image=image, bbox=bbox,category=xml_categories[cat])
+                id_counter += 1
+                
                 image.add(fin_ann)
 
             
