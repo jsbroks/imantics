@@ -105,7 +105,7 @@ class Image(Semantic):
         
         # Create empty image if not provided
         if image_array is None:
-            self.height, self.width, _ = (height,width)
+            self.height, self.width = (height,width)
 
         else:
         
