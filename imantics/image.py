@@ -176,7 +176,7 @@ class Image(Semantic):
         
         temp_image = cv2.imread(self.path)
         if temp_image is None:
-            temp_image = np.zeros((height,width,3)).astype(np.uint8)
+            temp_image = np.zeros((self.height,self.width,3)).astype(np.uint8)
         temp_image.setflags(write=True)
 
         for annotation in self.iter_annotations():
