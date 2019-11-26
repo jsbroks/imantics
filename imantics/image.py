@@ -105,11 +105,11 @@ class Image(Semantic):
         
         # Create empty image if not provided
         if image_array is None:
-            self.array = np.zeros((height, width, 3)).astype(np.uint8)
+            self.height, self.width, _ = (height,width)
+
         else:
-            self.array = image_array
         
-        self.height, self.width, _ = self.array.shape
+            self.height, self.width, _ = image_array.shape
         
         self.size = (self.width, self.height)
         self.file_name = os.path.basename(self.path)
@@ -172,7 +172,11 @@ class Image(Semantic):
         :returns: Image array with annotations
         :rtype: numpy.ndarray
         """
-        temp_image = self.array.copy()
+        
+        
+        temp_image = cv2.imread(self.path)
+        if temp_image is None:
+            temp_image = np.zeros((height,width,3))
         temp_image.setflags(write=True)
 
         for annotation in self.iter_annotations():
