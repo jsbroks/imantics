@@ -9,7 +9,6 @@ class TestImageCreate:
 
         assert image.height == height
         assert image.width == width
-        assert image.array.shape == (height, width, 3)
         assert len(image.annotations) == 0
         assert len(image.categories) == 0
 
