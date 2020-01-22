@@ -2,3 +2,4 @@ numpy
 opencv-python
 sphinx_rtd_theme
 lxml
+xmljson
