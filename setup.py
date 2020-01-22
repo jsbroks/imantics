@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='imantics',
-    version='0.1.11',
+    version='0.1.12',
     description='Python package for managing image annotations',
     url='https://github.com/jsbroks/imantics',
     author='Justin Brooks',
@@ -15,7 +15,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     license='MIT',
-    install_requires=['numpy', 'opencv-python>=3', 'lxml'],
+    install_requires=['numpy', 'opencv-python>=3', 'lxml', 'xmljson'],
     packages=['imantics'],
     python_requires='>=2.7',
     zip_safe=False,
