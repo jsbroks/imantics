@@ -105,10 +105,8 @@ class Image(Semantic):
         
         # Create empty image if not provided
         if image_array is None:
-            self.height, self.width = (height,width)
-
+            self.height, self.width = (height, width)
         else:
-        
             self.height, self.width, _ = image_array.shape
         
         self.size = (self.width, self.height)
@@ -118,7 +116,7 @@ class Image(Semantic):
 
     def add(self, annotation, category=None):
         """
-        Adds a annotaiton, list of annotaitons, mask, polygon or bbox to current image.
+        Adds an annotation, list of annotation, mask, polygon or bbox to current image.
         If annotation is not a Annotation a category is required
         List of non-Annotaiton objects will have the same category
 

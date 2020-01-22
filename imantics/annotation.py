@@ -122,7 +122,7 @@ class Annotation(Semantic):
     @property
     def mask(self):
         """
-        :class:`Mask` repsentation of the annotations
+        :class:`Mask` representation of the annotations
         """
         if not self._c_mask:
             
@@ -466,7 +466,9 @@ class BBox:
         :type thinkness: int
         """
         color = Color.create(color).rgb
-        cv2.rectangle(image, self.min_point, self.max_point, color, thickness)
+        image_copy = image.copy()
+        cv2.rectangle(image_copy, self.min_point, self.max_point, color, thickness)
+        return image_copy
 
     @property
     def min_point(self):
@@ -710,7 +712,9 @@ class Polygons:
         :type thinkness: int
         """
         color = Color.create(color).rgb
-        cv2.polylines(image, self.points, True, color, thickness)
+        image_copy = image.copy()
+        cv2.polylines(image_copy, self.points, True, color, thickness)
+        return image_copy
 
     def __eq__(self, other):
         if isinstance(other, self.INSTANCE_TYPES):
@@ -879,13 +883,14 @@ class Mask:
         :type alpha: float
         """       
         color = Color.create(color).rgb
+        image_copy = image.copy()
         for c in range(3):
-            image[:, :, c] = np.where(
+            image_copy[:, :, c] = np.where(
                 self.array,
-                image[:, :, c] * (1 - alpha) + alpha * color[c],
-                image[:, :, c]
+                image_copy[:, :, c] * (1 - alpha) + alpha * color[c],
+                image_copy[:, :, c]
             )
-        return image
+        return image_copy
 
     def subtract(self, other):
         """
