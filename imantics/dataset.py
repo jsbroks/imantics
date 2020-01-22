@@ -28,14 +28,16 @@ class Dataset(Semantic):
         for ext in extensions:
             xml_list += list(xml_folder.glob(f"*.{ext}"))
         categories = []
-        if "object" in xml["annotation"].keys():
-            if type(xml["annotation"]["object"]) is not list:
-                cat = xml["annotation"]["object"]["name"]["$"]
-                categories.append(cat)
-            else:
-                for ann in xml["annotation"]["object"]:
-                    cat = ann["name"]["$"]
+        for idx, imgp in enumerate(xml_list):	        
+            xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
+            if "object" in xml["annotation"].keys():
+                if type(xml["annotation"]["object"]) is not list:
+                    cat = xml["annotation"]["object"]["name"]["$"]
                     categories.append(cat)
+                else:
+                    for ann in xml["annotation"]["object"]:
+                        cat = ann["name"]["$"]
+                        categories.append(cat)
 
         categories = list(set(categories))
 
@@ -47,24 +49,25 @@ class Dataset(Semantic):
             image.dataset = name
             
 
+            for idx, imgp in enumerate(xml_list):	        
+                xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
+                if "object" in xml["annotation"].keys():
 
-            if "object" in xml["annotation"].keys():
+                    # Handle single object case
+                    if type(xml["annotation"]["object"]) is not list:
+                        xml["annotation"]["object"] = [xml["annotation"]["object"]]
 
-                # Handle single object case
-                if type(xml["annotation"]["object"]) is not list:
-                    xml["annotation"]["object"] = [xml["annotation"]["object"]]
-                    
-                for ann in xml["annotation"]["object"]:
-                    i = ann["bndbox"]
-                    cat = ann["name"]["$"]
+                    for ann in xml["annotation"]["object"]:
+                        i = ann["bndbox"]
+                        cat = ann["name"]["$"]
 
-                    x,y,xx,yy = (int(i["xmin"]["$"]), int(i["ymin"]["$"]),int(i["xmax"]["$"]),int(i["ymax"]["$"]))
-                    bbox = [x,y,xx,yy]
+                        x,y,xx,yy = (int(i["xmin"]["$"]), int(i["ymin"]["$"]),int(i["xmax"]["$"]),int(i["ymax"]["$"]))
+                        bbox = [x,y,xx,yy]
 
-                    fin_ann = Annotation(id=id_counter, image=image, bbox=bbox,category=xml_categories[cat])
-                    id_counter += 1
-                    
-                    image.add(fin_ann)
+                        fin_ann = Annotation(id=id_counter, image=image, bbox=bbox,category=xml_categories[cat])
+                        id_counter += 1
+
+                        image.add(fin_ann)
             
                     dataset.add(image)
         return dataset
