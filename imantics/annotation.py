@@ -179,32 +179,30 @@ class Annotation(Semantic):
         return self.bbox.area()
 
     def index(self, image):
-        
+
         annotation_index = image.annotations
         category_index = image.categories
 
         if self.id < 1:
             self.id = len(annotation_index) + 1
-        
-        found = annotation_index.get(self.id)
-        if found:
-            # Increment index until not found
-            self.id += 1
-            self.index(image)
+
+        # Increment index until not found
+        if annotation_index.get(self.id):
+            self.id = max(annotation_index.keys()) + 1
+
+        annotation_index[self.id] = self
+
+        # Category indexing should be case insenstive
+        category_name = self.category.name.lower()
+
+        # Check if category exists
+        category_found = category_index.get(category_name)
+        if category_found:
+            # Update category
+            self.category = category_found
         else:
-            annotation_index[self.id] = self
-
-            # Category indexing should be case insenstive
-            category_name = self.category.name.lower()
-
-            # Check if category exists
-            category_found = category_index.get(category_name)
-            if category_found:
-                # Update category
-                self.category = category_found
-            else:
-                # Index category
-                category_index[category_name] = self.category
+            # Index category
+            category_index[category_name] = self.category
     
     def set_image(self, image):
         """
