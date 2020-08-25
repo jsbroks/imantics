@@ -20,7 +20,7 @@ class Category(Semantic):
     def __init__(self, name, parent=None, metadata={}, id=0, color=None):
         self.id = id
         self.name = name
-        self.parent = None
+        self.parent = parent
         self.color = Color.create(color)
 
         super(Category, self).__init__(id, metadata)
