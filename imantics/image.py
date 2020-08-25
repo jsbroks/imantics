@@ -183,13 +183,13 @@ class Image(Semantic):
                 color = category.color if color_by_category else annotation.color
 
                 if mask:
-                    annotation.mask.draw(temp_image, alpha=alpha, color=color)
+                    temp_image = annotation.mask.draw(temp_image, alpha=alpha, color=color)
                 
                 if outline:
-                    annotation.polygons.draw(temp_image, color=color, thickness=thickness)
+                    temp_image = annotation.polygons.draw(temp_image, color=color, thickness=thickness)
 
                 if bbox:
-                    annotation.bbox.draw(temp_image, thickness=thickness, color=color)
+                    temp_image = annotation.bbox.draw(temp_image, thickness=thickness, color=color)
                 if text:
                     cv2.putText(temp_image, category.name, annotation.bbox.top_left, 
                         cv2.FONT_HERSHEY_PLAIN, text_scale, (0,0,0), 2, cv2.LINE_AA)
