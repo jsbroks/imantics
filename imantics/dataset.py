@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 from .annotation import Annotation
@@ -28,7 +29,7 @@ class Dataset(Semantic):
         for ext in extensions:
             xml_list += list(xml_folder.glob(f"*.{ext}"))
         categories = []
-        for idx, imgp in enumerate(xml_list):	        
+        for idx, imgp in enumerate(xml_list):
             xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
             if "object" in xml["annotation"].keys():
                 if type(xml["annotation"]["object"]) is not list:
@@ -142,6 +143,7 @@ class Dataset(Semantic):
         :param image: list, object or path to add to dataset
         :type image: :class:`Image` :class:`Annotation`, list, typle, path
         """
+        
         if isinstance(image, (list, tuple)):
             for img in image:
                 img.index(self)
@@ -199,13 +201,46 @@ class Dataset(Semantic):
         :returns: tuple of datasets with length of the number of ratios
         :rtype: tuple
         """
+        
+        if len(ratios) >= len(self.images):
+            raise ValueError("Too many values in ratio array compared to dataset size")
+        
         ratios = np.array(ratios)
         percents = ratios / ratios.sum()
 
-        if percents.sum() == 100:
-            percents /= 100
+        if percents.sum() != 1:
+            raise ValueError("Percents don't add up to 100%")
 
-        print(percents)
+        percents = percents[:-1] # don't need last percent, just take what is left
+        percents *= len(self.images) # how many images in each dataset
+        percents = percents.round().astype(np.int) # prepare where we split
+
+        if random:
+            images = random.sample(list(self.images.keys()))
+        else:
+            images = list(self.images.keys())
+
+        splits = np.split(images, percents)
+
+        datasets = []
+        for idx, split in enumerate(splits):
+            tmp_images = []
+
+            for key in split:
+                # get all images corresponding to the split's keys
+                tmp_images.append(self.images.get(key))
+
+            # build a new dataset's images out of it
+            tmp_images = dict(zip(split, tmp_images))
+
+            # NB: using Dataset(name, images=tmp_images) instead is buggy
+            # all datasets end up with all images instead of only their split
+            # don't really want to troubleshoot why, so here's a workaround
+            dataset = Dataset("split" + str(idx))
+            dataset.images = tmp_images
+            datasets.append(dataset)
+            
+        return datasets
 
     def coco(self):
         coco = {
@@ -224,6 +259,5 @@ class Dataset(Semantic):
             yolo[image.path] = image.yolo()
         
         return yolo
-
 
 __all__ = ["Dataset"]
