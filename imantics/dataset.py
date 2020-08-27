@@ -25,7 +25,7 @@ class Dataset(Semantic):
         dataset = cls(name)
         xml_list = []
         id_counter = 0
-        
+
         for ext in extensions:
             xml_list += list(xml_folder.glob(f"*.{ext}"))
         categories = []
@@ -48,7 +48,7 @@ class Dataset(Semantic):
             image = Image.from_path(str(imgp))
             image.id = idx
             image.dataset = name
-            
+
 
             xml = bf.data(fromstring(open(imgp.with_suffix(".xml"),"r").read()))
             if "object" in xml["annotation"].keys():
@@ -70,21 +70,21 @@ class Dataset(Semantic):
                     image.add(fin_ann)
             dataset.add(image)
         return dataset
-    
-    
+
+
     @classmethod
     def from_coco(cls, coco_obj, name="COCO Datset"):
         """
         Generates a dataset from a COCO object or python dict
 
-        :param coco_obj: 
+        :param coco_obj:
         :type coco_obj: dict, pycocotools.coco.COCO
         :raise ImportError: Raised if coco_obj is a `pycocotools.coco.COCO`
                             object and it cannot be imported
         """
         if isinstance(coco_obj, dict):
             dataset = cls(name)
-            
+
             coco_info = coco_obj.get('info', [])
             coco_annotations = coco_obj.get('annotations', [])
             coco_images = coco_obj.get('images', [])
@@ -100,7 +100,7 @@ class Dataset(Semantic):
                 dataset.add(image)
 
             for annotation in coco_annotations:
-                
+
                 image_id = annotation.get('image_id')
                 category_id = annotation.get('category_id')
 
@@ -108,34 +108,33 @@ class Dataset(Semantic):
                 category = index_categories[category_id]
                 segmentation = annotation.get('segmentation')
                 metadata = annotation.get('metadata', {})
-                
+
                 # color can be stored in the metadata
                 color = annotation.get('color', metadata.get('color'))
 
                 annotation = Annotation(image, category, polygons=segmentation,\
                                         color=color, metadata=metadata)
                 dataset.add(annotation)
-            
+
             return dataset
-        
+
         from pycocotools.coco import COCO
         if isinstance(coco_obj, COCO):
             pass
-        
+
         return None
-    
-    annotations = {}
-    categories = {}
-    images = {}
-    
+
     def __init__(self, name, images=[], id=0, metadata={}):
+        self.annotations = {}
+        self.categories = {}
+        self.images = {}
         self.name = name
 
         for image in images:
             image.index(self)
-        
+
         super(Dataset, self).__init__(id, metadata)
-    
+
     def add(self, image):
         """
         Adds image(s) to the current dataset
@@ -143,12 +142,12 @@ class Dataset(Semantic):
         :param image: list, object or path to add to dataset
         :type image: :class:`Image` :class:`Annotation`, list, typle, path
         """
-        
+
         if isinstance(image, (list, tuple)):
             for img in image:
                 img.index(self)
             return
-        
+
         if isinstance(image, Annotation):
             annotation = image
             image = self.images.get(annotation.image.id)
@@ -159,9 +158,9 @@ class Dataset(Semantic):
 
         if isinstance(image, str):
             image = Image.from_path(image)
-                
+
         image.index(self)
-    
+
     def iter_images(self):
         """
         Generator to iterate over all images
@@ -201,10 +200,10 @@ class Dataset(Semantic):
         :returns: tuple of datasets with length of the number of ratios
         :rtype: tuple
         """
-        
+
         if len(ratios) >= len(self.images):
             raise ValueError("Too many values in ratio array compared to dataset size")
-        
+
         ratios = np.array(ratios)
         percents = ratios / ratios.sum()
 
@@ -216,11 +215,11 @@ class Dataset(Semantic):
         percents = percents.round().astype(np.int) # prepare where we split
 
         if random:
-            images = random.sample(list(self.images.keys()))
+            im = random.sample(list(self.images.keys()))
         else:
-            images = list(self.images.keys())
+            im = list(self.images.keys())
 
-        splits = np.split(images, percents)
+        splits = np.split(im, percents)
 
         datasets = []
         for idx, split in enumerate(splits):
@@ -230,16 +229,9 @@ class Dataset(Semantic):
                 # get all images corresponding to the split's keys
                 tmp_images.append(self.images.get(key))
 
-            # build a new dataset's images out of it
-            tmp_images = dict(zip(split, tmp_images))
-
-            # NB: using Dataset(name, images=tmp_images) instead is buggy
-            # all datasets end up with all images instead of only their split
-            # don't really want to troubleshoot why, so here's a workaround
-            dataset = Dataset("split" + str(idx))
-            dataset.images = tmp_images
+            dataset = Dataset("split" + str(idx), images=tmp_images)
             datasets.append(dataset)
-            
+
         return datasets
 
     def coco(self):
@@ -249,9 +241,9 @@ class Dataset(Semantic):
             'images': [i.coco(include=False) for i in self.iter_images()],
             'annotations': [a.coco(include=False) for a in self.iter_annotations()]
         }
-        
+
         return coco
-    
+
     def yolo(self):
         yolo = {}
 
