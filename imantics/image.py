@@ -24,12 +24,15 @@ class Image(Semantic):
 
         :returns: list of :class:`Image`'s
         """
+        image_id = 0
         images = []
         for path, _, files in os.walk(directory):
             for name in files:
                 file_path = os.path.join(path, name)
                 if file_path.lower().endswith(cls.FORMATS):
                     images.append(cls.from_path(file_path))
+                    images[image_id].id = image_id
+                    image_id += 1
         
         return images
 
