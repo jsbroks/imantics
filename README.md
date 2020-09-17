@@ -35,6 +35,16 @@ Currently Support Formats:
 - YOLO
 - VOC
 
+
+<p align="center">Join our growing <a href="https://discord.gg/4zP5Qkj">discord community</a> of ML practitioner</p>
+<p align="center">
+  <a href="https://discord.gg/4zP5Qkj">
+    <img src="https://discord.com/assets/e4923594e694a21542a489471ecffa50.svg" width="120">
+  </a>
+</p>
+
+<br />
+
 <p align="center">If you enjoy my work please consider supporting me</p>
 <p align="center">
   <a href="https://www.patreon.com/jsbroks">
