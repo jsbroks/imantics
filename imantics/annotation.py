@@ -178,7 +178,7 @@ class Annotation(Semantic):
             return self.mask.area()
         return self.bbox.area()
 
-    def index(self, image):
+    def index(self, image, dataset=None):
 
         annotation_index = image.annotations
         category_index = image.categories
@@ -187,8 +187,19 @@ class Annotation(Semantic):
             self.id = len(annotation_index) + 1
 
         # Increment index until not found
-        if annotation_index.get(self.id):
-            self.id = max(annotation_index.keys()) + 1
+        if dataset is None:
+            if annotation_index.get(self.id):
+                self.id = max(annotation_index.keys()) + 1
+
+        else:
+            if dataset._max_ann_id is None:
+                if annotation_index.get(self.id):
+                    self.id = max(annotation_index.keys()) + 1
+                    dataset._max_ann_id = self.id
+
+            else:
+                dataset._max_ann_id += 1
+                self.id = dataset._max_ann_id
 
         annotation_index[self.id] = self
 

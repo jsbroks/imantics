@@ -129,7 +129,7 @@ class Dataset(Semantic):
         self.categories = {}
         self.images = {}
         self.name = name
-
+        self._max_ann_id = None
         for image in images:
             image.index(self)
 
