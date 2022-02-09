@@ -217,6 +217,9 @@ class Image(Semantic):
             yield category
         
     def coco(self, include=True):
+        keys_to_remove = {'license', 'flickr_url', 'coco_url', 'date_captured'}
+        metadata = {k: v for k, v in self.metadata.items() if k not in keys_to_remove}
+
         image = {
             'id': self.id,
             'width': self.width,
@@ -227,11 +230,10 @@ class Image(Semantic):
             'flickr_url': self.metadata.get('flicker_url'),
             'coco_url': self.metadata.get('coco_url'),
             'date_captured': self.metadata.get('date_captured'),
-            'metadata': self.metadata
+            'metadata': metadata
         }
         
         if include:
-            
             categories = []
             for category in self.iter_categories():
                 category.id = len(categories) + 1
