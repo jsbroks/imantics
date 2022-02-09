@@ -17,7 +17,7 @@ class Dataset(Semantic):
         """
         Generates a dataset from a folder with XML and corresponding images
 
-        :param xml_folder: 
+        :param xml_folder:
         :type xml_folder: pathlib.Path
         :raise ImportError: Raised if xml_folder is a `pathlib.Path`
                             object and it cannot be imported
@@ -130,6 +130,7 @@ class Dataset(Semantic):
         self.images = {}
         self.name = name
         self._max_ann_id = None
+        self._max_img_id = None
         for image in images:
             image.index(self)
 
@@ -249,7 +250,8 @@ class Dataset(Semantic):
 
         for image in self.iter_images():
             yolo[image.path] = image.yolo()
-        
+
         return yolo
+
 
 __all__ = ["Dataset"]
