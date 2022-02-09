@@ -26,11 +26,17 @@ class Category(Semantic):
         super(Category, self).__init__(id, metadata)
 
     def coco(self, include=True):
+        if type(self.parent) is Category:
+            supercategory = self.parent.name
+        elif type(self.parent) is str:
+            supercategory = self.parent
+        else:
+            supercategory = None
 
         category = {
             'id': self.id,
             'name': self.name,
-            'supercategory': self.parent.name if self.parent else None,
+            'supercategory': supercategory,
             'metadata': self.metadata,
             'color': self.color.hex
         }
