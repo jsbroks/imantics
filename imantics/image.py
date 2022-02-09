@@ -109,7 +109,7 @@ class Image(Semantic):
         if image_array is None:
             self.height, self.width = (height, width)
         else:
-            self.height, self.width, _ = image_array.shape
+            self.height, self.width = image_array.shape[:2]
 
         self.size = (self.width, self.height)
         self.file_name = os.path.basename(self.path)
