@@ -88,7 +88,7 @@ class Annotation(Semantic):
                  color=None, metadata={}, width=0, height=0):
         
         assert isinstance(id, int), "id must be an integer"
-        assert bbox or mask or polygons, "you must provide a mask, bbox or polygon"
+        assert bbox is not None or mask is not None or polygons is not None, "you must provide a mask, bbox or polygon"
 
         self.image = image
         self.width = width
