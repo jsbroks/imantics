@@ -224,7 +224,7 @@ class Image(Semantic):
             'file_name': self.file_name,
             'path': self.path,
             'license': self.metadata.get('license'),
-            'fickr_url': self.metadata.get('flicker_url'),
+            'flickr_url': self.metadata.get('flicker_url'),
             'coco_url': self.metadata.get('coco_url'),
             'date_captured': self.metadata.get('date_captured'),
             'metadata': self.metadata
