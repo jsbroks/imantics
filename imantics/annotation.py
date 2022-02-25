@@ -290,6 +290,7 @@ class Annotation(Semantic):
                 # 4 value segmentation mask is a bounding box
                 polygon = annotation['segmentation'][i]
                 x1, y1, x2, y2 = polygon
+
                 if x2 == x1:
                     x = x1
                     y = (y2 + y1) // 2
