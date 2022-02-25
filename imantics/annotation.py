@@ -286,10 +286,17 @@ class Annotation(Semantic):
                 # 4 value segmentation mask is a bounding box
                 polygon = annotation['segmentation'][i]
                 x1, y1, x2, y2 = polygon
-                a = (y2 - y1) / (x2 - x1)
-                b = y1 - a*x1
-                x = (x2 + x1) // 2
-                y = int(round(a*x + b))
+                if x2 == x1:
+                    x = x1
+                    y = (y2 + y1) // 2
+                elif y2 == y1:
+                    x = (x2 + x1) // 2
+                    y = y1
+                else:
+                    a = (y2 - y1) / (x2 - x1)
+                    b = y1 - a*x1
+                    x = (x2 + x1) // 2
+                    y = int(round(a*x + b))
 
                 new_segmentation = polygon[:2] + [x, y] + polygon[2:]
                 annotation['segmentation'][i] = new_segmentation
