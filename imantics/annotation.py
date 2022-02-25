@@ -298,8 +298,8 @@ class Annotation(Semantic):
                     x = (x2 + x1) // 2
                     y = int(round(a*x + b))
 
-                new_point = polygon[:2] + [x, y] + polygon[2:]
-                annotation['segmentation'][i] = new_point
+                new_segmentation = polygon[:2] + [x, y] + polygon[2:]
+                annotation['segmentation'][i] = new_segmentation
 
         if include:
             image = category = {}
