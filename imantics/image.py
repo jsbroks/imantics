@@ -1,5 +1,4 @@
-
-from lxml import etree as ET    
+from lxml import etree as ET
 from lxml.builder import E
 
 import os
@@ -14,7 +13,7 @@ from .styles import COCO, VGG, VOC, YOLO
 
 
 class Image(Semantic):
-    
+
     FORMATS = ('.png', '.jpg', '.jpeg', '.jpe', '.tiff', '.bmp', '.sr', '.ras')
 
     @classmethod
@@ -33,7 +32,7 @@ class Image(Semantic):
                     images.append(cls.from_path(file_path))
                     images[image_id].id = image_id
                     image_id += 1
-        
+
         return images
 
     @classmethod
@@ -44,7 +43,7 @@ class Image(Semantic):
         """
         if os.path.isdir(path):
             return Image.from_folder(path)
-        
+
         brg = cv2.imread(path)
         image_array = cv2.cvtColor(brg, cv2.COLOR_BGR2RGB)
 
@@ -105,13 +104,13 @@ class Image(Semantic):
         # Load image form path if path is provided and image_array is not
         #if len(path) != 0 and image_array is None:
             # self = Image.from_path(path)
-        
+
         # Create empty image if not provided
         if image_array is None:
             self.height, self.width = (height, width)
         else:
-            self.height, self.width, _ = image_array.shape
-        
+            self.height, self.width = image_array.shape[:2]
+
         self.size = (self.width, self.height)
         self.file_name = os.path.basename(self.path)
 
@@ -139,19 +138,28 @@ class Image(Semantic):
             else:
                 raise ValueError('Cannot add annotaiton of size {} to image of size {}'\
                                  .format(annotation.array.shape, (self.height, self.width)))
-            
+
         if isinstance(annotation, BBox):
             annotation = Annotation.from_bbox(annotation, image=self, category=category)
 
         if isinstance(annotation, Polygons):
             annotation = Annotation.from_polygons(annotation, image=self, category=category)
-        
+
         annotation.set_image(self)
         annotation.index(self)
 
     def index(self, dataset):
-        
         image_index = dataset.images
+
+        if dataset._max_img_id is None:
+            if image_index.get(self.id):
+                self.id = max(image_index.keys()) + 1
+                dataset._max_img_id = self.id
+
+        else:
+            dataset._max_img_id += 1
+            self.id = dataset._max_img_id
+
         image_index[self.id] = self
 
         for annotation in self.iter_annotations():
@@ -162,7 +170,7 @@ class Image(Semantic):
         """
         Draws annotations on top of the image. If no image is loaded, annotations will be applied
         to a black image array.
-        
+
         :param bbox: Draw bboxes
         :param outline: Draw mask outlines
         :param mask: Draw masks
@@ -173,8 +181,8 @@ class Image(Semantic):
         :returns: Image array with annotations
         :rtype: numpy.ndarray
         """
-        
-        
+
+
         temp_image = cv2.imread(self.path)
         if temp_image is None:
             temp_image = np.zeros((self.height,self.width,3)).astype(np.uint8)
@@ -187,19 +195,19 @@ class Image(Semantic):
 
                 if mask:
                     temp_image = annotation.mask.draw(temp_image, alpha=alpha, color=color)
-                
+
                 if outline:
                     temp_image = annotation.polygons.draw(temp_image, color=color, thickness=thickness)
 
                 if bbox:
                     temp_image = annotation.bbox.draw(temp_image, thickness=thickness, color=color)
                 if text:
-                    cv2.putText(temp_image, category.name, annotation.bbox.top_left, 
+                    cv2.putText(temp_image, category.name, annotation.bbox.top_left,
                         cv2.FONT_HERSHEY_PLAIN, text_scale, (0,0,0), 2, cv2.LINE_AA)
-                    cv2.putText(temp_image, category.name, annotation.bbox.top_left, 
+                    cv2.putText(temp_image, category.name, annotation.bbox.top_left,
                         cv2.FONT_HERSHEY_PLAIN, text_scale, (255,255,255), 1, cv2.LINE_AA)
 
-        return temp_image       
+        return temp_image
 
     def iter_annotations(self):
         """
@@ -215,7 +223,7 @@ class Image(Semantic):
         """
         for key, category in self.categories.items():
             yield category
-        
+
     def coco(self, include=True):
         keys_to_remove = {'license', 'flickr_url', 'coco_url', 'date_captured'}
         metadata = {k: v for k, v in self.metadata.items() if k not in keys_to_remove}
@@ -232,7 +240,7 @@ class Image(Semantic):
             'date_captured': self.metadata.get('date_captured'),
             'metadata': metadata
         }
-        
+
         if include:
             categories = []
             for category in self.iter_categories():
@@ -251,18 +259,18 @@ class Image(Semantic):
             }
 
         return image
-    
+
     def yolo(self):
         yolo = []
-        
+
         categories = []
         for category in self.iter_categories():
             category.id = len(categories) + 1
             categories.append(category)
-        
+
         for annotation in self.iter_annotations():
             yolo.append(annotation.yolo())
-        
+
         return yolo
 
     def voc(self, pretty=False):
@@ -270,7 +278,7 @@ class Image(Semantic):
         annotations = []
         for annotation in self.iter_annotations():
             annotations.append(annotation.voc())
-        
+
         element = E('annotation',
             E('folder', self.path[: -1*(len(self.file_name)+1)]),
             E('path', self.path),
@@ -282,10 +290,10 @@ class Image(Semantic):
             ),
             *annotations
         )
-        
+
         if pretty:
             return ET.tostring(element, pretty_print=True).decode('utf-8')
-        
+
         return element
 
     def save(self, file_path, style=COCO):
