@@ -279,18 +279,32 @@ class Annotation(Semantic):
 
         }
 
-        if len(annotation['segmentation']) == 4:
-            # create another point in the middle of segmentation to
-            # avoid bug when using pycocotools, which thinks that a
-            # 4 value segmentation mask is a bounding box
-            x1, y1, x2, y2 = annotation['segmentation']
-            a = (y2 - y1) / (x2 - x1)
-            b = y1 - a*x1
-            x = (x2 + x1) // 2
-            y = int(round(a*x + b))
+        i = 0
+        while i < len(annotation['segmentation']):
+            if len(annotation['segmentation'][i]) == 2:
+                # discard segmentation that is only a point
+                annotation['segmentation'].pop(i)
+            elif len(annotation['segmentation'][i]) == 4:
+                # create another point in the middle of segmentation to
+                # avoid bug when using pycocotools, which thinks that a
+                # 4 value segmentation mask is a bounding box
+                polygon = annotation['segmentation'][i]
+                x1, y1, x2, y2 = polygon
+                if x2 == x1:
+                    x = x1
+                    y = (y2 + y1) // 2
+                elif y2 == y1:
+                    x = (x2 + x1) // 2
+                    y = y1
+                else:
+                    a = (y2 - y1) / (x2 - x1)
+                    b = y1 - a*x1
+                    x = (x2 + x1) // 2
+                    y = int(round(a*x + b))
 
-            new_segmentation = annotation['segmentation'][:2] + [x, y] + annotation['segmentation'][2:]
-            annotation['segmentation'] = new_segmentation
+                new_segmentation = polygon[:2] + [x, y] + polygon[2:]
+                annotation['segmentation'][i] = new_segmentation
+                i += 1
 
         if include:
             image = category = {}
