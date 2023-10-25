@@ -184,6 +184,8 @@ class Image(Semantic):
 
 
         temp_image = cv2.imread(self.path)
+        temp_image = cv2.cvtColor(temp_image, cv2.COLOR_BGR2RGB)
+
         if temp_image is None:
             temp_image = np.zeros((self.height,self.width,3)).astype(np.uint8)
         temp_image.setflags(write=True)
