@@ -35,9 +35,9 @@ Currently Support Formats:
 - YOLO
 - VOC
 
-This version fix color order changes from BGR to RGB introduced in version 0.1.12 (or at least after 0.1.9).
-Also note that v0.1.12 is actually the official imantics pip version, but this version is buggous.
-Stay on master branch to benefit from unreleased v0.1.13 vresion that fix problems (except color order change)
+This version fix color order changes from BGR to RGB introduced in version 0.1.12 (or at least after 0.1.9).  
+Also note that v0.1.12 is actually the official imantics pip version, but this version is buggous.  
+Stay on master branch to benefit from unreleased 0.1.13 version that fix problems (except color order change)
 
 so instead of 
 ```
