@@ -204,6 +204,9 @@ class Annotation(Semantic):
         annotation_index[self.id] = self
 
         # Category indexing should be case insenstive
+        if self.category == None:
+            print('WARNING - Category is None for Annotation', flush=True)
+            return
         category_name = self.category.name.lower()
 
         # Check if category exists

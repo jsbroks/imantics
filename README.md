@@ -36,8 +36,9 @@ Currently Support Formats:
 - VOC
 
 This version fix color order changes from BGR to RGB introduced in version 0.1.12 (or at least after 0.1.9).  
+This version also fix infinite loop in Annotation.coco() thank's to george-gca work. (cherry-pick george-gca fix).
 Also note that v0.1.12 is actually the official imantics pip version, but this version is buggous.  
-Stay on master branch to benefit from unreleased 0.1.13 version that fix problems (except color order change)
+Stay on master branch to benefit from unreleased 0.1.13 version that fix problems (except color order change and infinite loop)
 
 so instead of 
 ```
@@ -47,7 +48,7 @@ prefer
 ```
 pip install imantics==0.1.9
 
-or better
+or better, get version with my fixes
 pip install git+https://github.com/SixK/imantics.git
 ```
 
