@@ -191,6 +191,8 @@ class Image(Semantic):
         temp_image.setflags(write=True)
 
         for annotation in self.iter_annotations():
+            if color_by_category and annotation.category is None:
+                continue
             category = annotation.category
             if  (categories is None) or (category in categories):
                 if category == None :
