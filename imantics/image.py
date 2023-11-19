@@ -193,6 +193,10 @@ class Image(Semantic):
         for annotation in self.iter_annotations():
             category = annotation.category
             if  (categories is None) or (category in categories):
+                if category == None :
+                    print('WARNING - Category is None for Image', flush=True)
+                    return
+
                 color = category.color if color_by_category else annotation.color
 
                 if mask:
